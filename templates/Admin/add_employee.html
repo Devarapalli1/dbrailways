@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+        }
+        header {
+            background-color: #DEB887;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #FFFAFA;
+            color: #fff;
+            padding-top: 20px;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 24px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #DEB887;
+        }
+        .main-container{
+            display: flex;
+        }
+        .container {
+            width: 100%; /* Makes the container take up the full width */
+            padding: 20px; /* Adds 20px padding inside the container */
+            background-color: #fff; /* White background color */
+            border-radius: 8px; /* Rounded corners */
+
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        form label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #555;
+        }
+        form input[type="text"],
+        form input[type="number"],
+        form button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        form button {
+            background-color: #DEB887;
+            color: #000000;
+            border: none;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #DEB887;
+        }
+        /* Table styling to match the form layout */
+        table {
+            width: 100%; /* Ensure the table takes up full width of its container */
+            max-width: 900px;  /* Similar max-width as the form container */
+            margin: 20px auto;  /* Center the table with space on top */
+            border: 1px solid black;  /* Light border around the table */
+            border-radius: 8px;  /* Rounded corners to match the form */
+            overflow: hidden;  /* Ensures rounded corners are visible */
+        }
+
+        /* Table header and cells styling */
+        table th, table td {
+            padding: 12px 16px;  /* Similar padding to form fields */
+            text-align: center;  /* Center the text inside cells */
+            border: 1px solid black;
+            /* Same border style as form inputs */
+        }
+
+        /* Table header styling */
+        table th {
+            background-color: #f4f4f4;  /* Light background for header */
+            color: #555;  /* Dark text color for contrast */
+            font-weight: bold;
+            border: 1px solid ;
+        }
+
+        /* Alternate row color */
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+            color: #555;/* Light background for even rows */
+            border: 1px solid ;
+        }
+
+        /* Hover effect on table rows */
+        table tr:hover {
+            background-color: #f1f1f1;  /* Highlight row on hover */
+
+        }
+
+        /* Button styling inside the table (e.g., for Edit buttons) */
+        table td button {
+            padding: 8px 12px;  /* Padding for the buttons */
+            background-color: #DEB887;  /* Match the button color */
+            color: #000;  /* Dark button text */
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 5px;  /* Rounded button corners */
+        }
+
+        table td button:hover {
+            background-color: #c7a56d;  /* Darker color on hover */
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .modal .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .modal .close:hover,
+        .modal .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap; /* Allow the form to wrap if necessary */
+            gap: 20px;  /* Space between each field */
+            align-items: center;  /* Vertically center items */
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;  /* Space between label and input */
+            align-items: center;  /* Vertically center label and input */
+        }
+
+        label {
+            width: 150px;
+            text-align: right; /* Align label text to the right */
+        }
+
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;  /* Space between label and input */
+            align-items: center;  /* Vertically center label and input */
+        }
+
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Railway Management</h1>
+    <h3>{{ error }}</h3>
+</header>
+<div class="main-container">
+<div class="sidebar">
+    <a href="/admin_dashboard">Dashboard</a>
+    <a href="#" id="train-link">Trains</a>
+    <div class="sub-menu" id="train-submenu">
+        <a href="/add_train">Add Train</a>
+        <a href="/add_stations">Add Stations</a>
+        <a href="/add_seats">Add Seats</a>
+        <a href="/add_schedules">Add Schedules</a>
+        <a href="/add_routes">Add Routes</a>
+        <a href="/add_cancellations">Add Cancellations</a>
+        <a href="/add_delays">Add Delays</a>
+    </div>
+    <a href="#" id="employee-link">Employees</a>
+    <div class="sub-menu1" id="employee-submenu">
+        <a href="/add_departments">Add Departments</a>
+        <a href="/add_employees">Add Employees</a>
+        <a href="/add_shifts">Add Shifts</a>
+        <a href="/assignemployee_shifts">Add Employee Shifts</a>
+    </div>
+</div>
+<div class="container">
+    <h1>Add Employee Details</h1>
+    <form action="/add_employees" method="POST">
+        <!-- Group fields into three per row -->
+        <div class="form-row">
+            <div class="form-item">
+                <label for="employee_id">Employee ID:</label>
+                <input type="text" id="employee_id" name="employee_id" required>
+            </div>
+            <div class="form-item">
+                <label for="employee_name">Employee Name:</label>
+                <input type="text" id="employee_name" name="employee_name" required>
+            </div>
+            <div class="form-item">
+                <label for="mail">Employee Email:</label>
+                <input type="email" id="mail" name="mail" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-item">
+                <label for="mobileNumber">Mobile Number:</label>
+                <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" required>
+            </div>
+            <div class="form-item">
+                <label for="role">Employee Role:</label>
+                <input type="text" id="role" name="role" required>
+            </div>
+            <div class="form-item">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-item">
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city">
+            </div>
+            <div class="form-item">
+                <label for="state">State:</label>
+                <input type="text" id="state" name="state">
+            </div>
+            <div class="form-item">
+                <label for="country">Country:</label>
+                <input type="text" id="country" name="country">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-item">
+                <label for="zipcode">Zipcode:</label>
+                <input type="number" id="zipcode" name="zipcode">
+            </div>
+            <div class="form-item">
+                <label for="emp_password">Password:</label>
+                <input type="password" id="emp_password" name="emp_password" required>
+            </div>
+            <div class="form-item">
+                <label for="emp_status">Status:</label>
+                <input type="text" id="emp_status" name="emp_status">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-item">
+                <label for="salary">Salary:</label>
+                <input type="number" id="salary" name="salary" required>
+            </div>
+            <div class="form-item">
+                <label for="department_id">Department ID:</label>
+                <select id="department_id" name="department_id" required>
+                    <option value="">Select Department</option>
+                    {% for department in departments %}
+                        <option value="{{ department[0] }}">{{ department[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+</div>
+
+<hr>
+
+<h2>Employee List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Employee ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Mobile</th>
+        <th>Role</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Country</th>
+        <th>Zipcode</th>
+        <th>Password</th>
+        <th>Status</th>
+        <th>Salary</th>
+        <th>Department ID</th>
+        <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for employee in employees %}
+        <tr>
+            <td>{{ employee[0] }}</td>
+            <td>{{ employee[1] }}</td>
+            <td>{{ employee[2] }}</td>
+            <td>{{ employee[3] }}</td>
+            <td>{{ employee[4] }}</td>
+            <td>{{ employee[5] }}</td>
+            <td>{{ employee[6] }}</td>
+            <td>{{ employee[7] }}</td>
+            <td>{{ employee[8] }}</td>
+            <td>{{ employee[9] }}</td>
+            <td>{{ employee[10] }}</td>
+            <td>{{ employee[11] }}</td>
+            <td>{{ employee[12] }}</td>
+            <td>{{ employee[13] }}</td>
+            <td><button class="editBtn" data-id="{{ employee[0] }}"
+                        data-name="{{ employee[1] }}"
+                        data-email="{{ employee[2] }}"
+                        data-mobile="{{ employee[3] }}"
+                        data-role="{{ employee[4] }}"
+                        data-address="{{ employee[5] }}"
+                        data-city="{{ employee[6] }}"
+                        data-state="{{ employee[7] }}"
+                        data-country="{{ employee[8] }}"
+                        data-zipcode="{{ employee[9] }}"
+                        data-password="{{ employee[10] }}"
+                        data-status="{{ employee[11] }}"
+                        data-salary="{{ employee[12] }}"
+                        data-department_id="{{ employee[13] }}">Edit</button></td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Employee</h2>
+        <form id="editForm" action="/edit_employees" method="POST">
+            <div class="form-row">
+                <label for="editEmployeeId">Employee ID:</label>
+                <input type="text" id="editEmployeeId" name="editEmployeeId" readonly><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editEmployeeName">Employee Name:</label>
+                <input type="text" id="editEmployeeName" name="editEmployeeName" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editEmail">Email:</label>
+                <input type="email" id="editEmail" name="editEmail" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editMobile">Mobile:</label>
+                <input type="tel" id="editMobile" name="editMobile" pattern="[0-9]{10}" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editRole">Role:</label>
+                <input type="text" id="editRole" name="editRole" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editAddress">Address:</label>
+                <input type="text" id="editAddress" name="editAddress"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editCity">City:</label>
+                <input type="text" id="editCity" name="editCity"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editState">State:</label>
+                <input type="text" id="editState" name="editState"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editCountry">Country:</label>
+                <input type="text" id="editCountry" name="editCountry"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editZipcode">Zipcode:</label>
+                <input type="number" id="editZipcode" name="editZipcode"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editPassword">Password:</label>
+                <input type="text" id="editPassword" name="editPassword"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editStatus">Status:</label>
+                <input type="text" id="editStatus" name="editStatus"><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editSalary">Salary:</label>
+                <input type="number" id="editSalary" name="editSalary" required><br><br>
+            </div>
+
+            <div class="form-row">
+                <label for="editDepartmentId">Department ID:</label>
+                <select id="editDepartmentId" name="editDepartmentId" required>
+                    <!-- Default Option -->
+                    <option value="">Select Department</option>
+
+                    <!-- Loop to dynamically populate the dropdown with department options -->
+                    {% for department in departments %}
+                        <option value="{{ department[0] }}">{{ department[1] }}</option>
+                    {% endfor %}
+
+                </select><br>
+            </div>
+
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Get modal element
+    var modal = document.getElementById("editModal");
+    var closeModal = document.getElementsByClassName("close")[0];
+
+    // Get all the edit buttons
+    var editButtons = document.querySelectorAll(".editBtn");
+
+    // When an edit button is clicked
+    editButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+            // Get department details from the button data attributes
+            var EmployeeId = button.getAttribute("data-id");
+            var EmployeeName = button.getAttribute("data-name");
+            var email = button.getAttribute("data-email");
+            var mobile = button.getAttribute("data-mobile");
+            var role = button.getAttribute("data-role");
+            var address = button.getAttribute("data-address");
+            var city = button.getAttribute("data-city");
+            var state = button.getAttribute("data-state");
+            var country = button.getAttribute("data-country");
+            var zipcode = button.getAttribute("data-zipcode");
+            var password = button.getAttribute("data-password");
+
+            var status = button.getAttribute("data-status");
+            var salary = button.getAttribute("data-salary");
+            var departmentId = button.getAttribute("data-department_id");
+
+            // Populate the modal fields with department data
+            document.getElementById("editEmployeeId").value = EmployeeId;
+            document.getElementById("editEmployeeName").value = EmployeeName;
+            document.getElementById("editEmail").value = email;
+            document.getElementById("editMobile").value = mobile;
+            document.getElementById("editRole").value = role;
+            document.getElementById("editAddress").value = address;
+            document.getElementById("editCity").value = city;
+            document.getElementById("editState").value = state;
+            document.getElementById("editCountry").value = country;
+            document.getElementById("editZipcode").value = zipcode;
+            document.getElementById("editPassword").value = password;
+            document.getElementById("editStatus").value = status;
+            document.getElementById("editSalary").value = salary;
+            document.getElementById("editDepartmentId").value = departmentId;
+
+            // Show the modal
+            modal.style.display = "block";
+        });
+    });
+
+    // Close the modal when the user clicks the "x"
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Close the modal if the user clicks outside the modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+</body>
+</html>

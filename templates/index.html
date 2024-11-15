@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
+            margin: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        #adminButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #userButton {
+            background-color: #008CBA;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to the Website</h1>
+<p>Select an option:</p>
+
+<!-- Button for Admin Login -->
+<button id="adminButton" onclick="window.location.href='/admin_login'">Admin Login</button>
+
+<!-- Button for User Booking -->
+<button id="userButton" onclick="window.location.href='/user_login'">User Booking</button>
+
+</body>
+</html>

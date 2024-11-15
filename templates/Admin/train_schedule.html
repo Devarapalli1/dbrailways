@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .edit-button {
+            background-color: #007bff;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            margin: 15% auto;
+            border: 1px solid #ddd;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            cursor: pointer;
+            float: right;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Add Schedule</h1>
+<form action="/add_trainschedule" method="POST">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" name="start_date" required><br><br>
+
+    <label for="startPoint">Start Point:</label>
+    <input type="number" id="startPoint" name="start_point" required><br><br>
+
+    <label for="departureTime">Departure Time:</label>
+    <input type="time" id="departureTime" name="departure_time" required><br><br>
+
+    <label for="endPoint">End Point:</label>
+    <input type="number" id="endPoint" name="end_point" required><br><br>
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" name="end_date" required><br><br>
+
+    <label for="arrivalTime">Arrival Time:</label>
+    <input type="time" id="arrivalTime" name="arrival_time" required><br><br>
+
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+        <option value="" disabled selected>Select status</option>
+        <option value="Scheduled">Scheduled</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+    </select><br><br>
+
+    <label for="price">Price:</label>
+    <input type="number" step="0.01" id="price" name="price" required><br><br>
+
+    <label for="seatsAvailable">Seats Available:</label>
+    <input type="number" id="seatsAvailable" name="seats_available" required><br><br>
+
+    <label for="trainId">Train Id:</label>
+    <input type="number" id="trainId" name="train_id" required><br><br>
+
+    <button type="submit">Add Schedule</button>
+</form>
+
+<hr>
+
+<h2>Schedule List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Schedule Id</th>
+        <th>Start Date</th>
+        <th>Start Point</th>
+        <th>Departure Time</th>
+        <th>End Point</th>
+        <th>End Date</th>
+        <th>Arrival Time</th>
+        <th>Status</th>
+        <th>Price</th>
+        <th>Seats Available</th>
+        <th>Train Id</th>
+        <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for schedule in schedules %}
+        <tr>
+            <td>{{ schedule[0] }}</td>
+            <td>{{ schedule[1] }}</td>
+            <td>{{ schedule[2] }}</td>
+            <td>{{ schedule[3] }}</td>
+            <td>{{ schedule[4] }}</td>
+            <td>{{ schedule[5] }}</td>
+            <td>{{ schedule[6] }}</td>
+            <td>{{ schedule[7] }}</td>
+            <td>{{ schedule[8] }}</td>
+            <td>{{ schedule[9] }}</td>
+            <td>{{ schedule[10] }}</td>
+            <td>
+                <button class="edit-button" onclick="openEditModal({{ schedule[0] }}, '{{ schedule[1] }}', {{ schedule[2] }}, '{{ schedule[3] }}', {{ schedule[4] }}, '{{ schedule[5] }}', '{{ schedule[6] }}', '{{ schedule[7] }}', {{ schedule[8] }},{{ schedule[9] }}, {{ schedule[10] }})">Edit</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Edit Schedule Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Schedule</h2>
+        <form id="editForm" action="/edit_schedule" method="POST">
+            <input type="hidden" id="editScheduleId" name="schedule_id">
+            <label for="editStartDate">Start Date:</label>
+            <input type="date" id="editStartDate" name="start_date" required><br><br>
+
+            <label for="editStartPoint">Start Point:</label>
+            <input type="number" id="editStartPoint" name="start_point" required><br><br>
+
+            <label for="editDepartureTime">Departure Time:</label>
+            <input type="time" id="editDepartureTime" name="departure_time" required><br><br>
+
+            <label for="editEndPoint">End Point:</label>
+            <input type="number" id="editEndPoint" name="end_point" required><br><br>
+
+            <label for="editEndDate">End Date:</label>
+            <input type="date" id="editEndDate" name="end_date" required><br><br>
+
+            <label for="editArrivalTime">Arrival Time:</label>
+            <input type="time" id="editArrivalTime" name="arrival_time" required><br><br>
+
+            <label for="editStatus">Status:</label>
+            <select id="editStatus" name="status" required>
+                <option value="Scheduled">Scheduled</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select><br><br>
+
+            <label for="editPrice">Price:</label>
+            <input type="number" step="0.01" id="editPrice" name="price" required><br><br>
+
+            <label for="editSeatsAvailable">Seats Available:</label>
+            <input type="number" id="editSeatsAvailable" name="seats_available" required><br><br>
+
+            <label for="editTrainId">Train Id:</label>
+            <input type="number" id="editTrainId" name="train_id" required><br><br>
+
+            <button type="submit">Update Schedule</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(scheduleId, startDate, startPoint, departureTime, endPoint, endDate, arrivalTime, status, price, seatsAvailable) {
+        document.getElementById("editScheduleId").value = scheduleId;
+        document.getElementById("editStartDate").value = startDate;
+        document.getElementById("editStartPoint").value = startPoint;
+        document.getElementById("editDepartureTime").value = departureTime;
+        document.getElementById("editEndPoint").value = endPoint;
+        document.getElementById("editEndDate").value = endDate;
+        document.getElementById("editArrivalTime").value = arrivalTime;
+        document.getElementById("editStatus").value = status;
+        document.getElementById("editPrice").value = price;
+        document.getElementById("editSeatsAvailable").value = seatsAvailable;
+
+        document.getElementById("editModal").style.display = "block";
+    }
+
+    function closeEditModal() {
+        document.getElementById("editModal").style.display = "none";
+    }
+
+    // Close the modal if the user clicks anywhere outside of the modal
+    window.onclick = function(event) {
+        var modal = document.getElementById("editModal");
+        if (event.target == modal) {
+            closeEditModal();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancellation Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Add Cancellation</h1>
+<form action="/add_cancellation" method="POST">
+    <label for="scheduleId">Schedule ID:</label>
+    <select id="scheduleId" name="schedule_id" required>
+        <option value="" disabled selected>Select Schedule</option>
+        {% for schedule in schedules %}
+            <option value="{{ schedule[0] }}">{{ schedule[1] }} - {{ schedule[5] }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label for="cancellationDate">Cancellation Date:</label>
+    <input type="date" id="cancellationDate" name="cancellation_date" required><br><br>
+
+    <label for="reason">Reason:</label>
+    <textarea id="reason" name="reason" required></textarea><br><br>
+
+    <button type="submit">Add Cancellation</button>
+</form>
+
+<hr>
+
+<h2>Cancellation List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Cancellation ID</th>
+        <th>Schedule ID</th>
+        <th>Cancellation Date</th>
+        <th>Reason</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for cancellation in cancellations %}
+        <tr>
+            <td>{{ cancellation[0] }}</td>
+            <td>{{ cancellation[1] }}</td>
+            <td>{{ cancellation[2] }}</td>
+            <td>{{ cancellation[3] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

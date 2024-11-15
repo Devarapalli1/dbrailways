@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delay Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .edit-button {
+            background-color: #007bff;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Add Delay</h1>
+<form action="/add_delay" method="POST">
+    <label for="scheduleId">Schedule ID:</label>
+    <select id="scheduleId" name="schedule_id" required>
+        <option value="" disabled selected>Select Schedule</option>
+        {% for schedule in schedules %}
+            <option value="{{ schedule[0] }}">{{ schedule[1] }} - {{ schedule[5] }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label for="duration">Duration:</label>
+    <input type="time" id="duration" name="duration" required><br><br>
+
+    <label for="reason">Reason:</label>
+    <textarea id="reason" name="reason" required></textarea><br><br>
+
+    <button type="submit">Add Delay</button>
+</form>
+
+<hr>
+
+<h2>Delay List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Delay ID</th>
+        <th>Schedule ID</th>
+        <th>Duration</th>
+        <th>Reason</th>
+        <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for delay in delays %}
+        <tr>
+            <td>{{ delay.delay_id }}</td>
+            <td>{{ delay.schedule_id }}</td>
+            <td>{{ delay.duration }}</td>
+            <td>{{ delay.reason }}</td>
+            <td>
+                <button class="edit-button" onclick="openEditModal({{ delay.delay_id }}, {{ delay.schedule_id }}, '{{ delay.duration }}', '{{ delay.reason }}')">Edit</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Edit Delay Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeEditModal()" style="cursor:pointer; float:right;">&times;</span>
+        <h2>Edit Delay</h2>
+        <form id="editForm" action="/edit_delay" method="POST">
+            <input type="hidden" id="editDelayId" name="delay_id">
+            <label for="editScheduleId">Schedule ID:</label>
+            <input type="number" id="editScheduleId" name="schedule_id" required readonly><br><br>
+
+            <label for="editDuration">Duration:</label>
+            <input type="time" id="editDuration" name="duration" required><br><br>
+
+            <label for="editReason">Reason:</label>
+            <textarea id="editReason" name="reason" required></textarea><br><br>
+
+            <button type="submit">Update Delay</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(delayId, scheduleId, duration, reason) {
+        document.getElementById("editDelayId").value = delayId;
+        document.getElementById("editScheduleId").value = scheduleId;
+        document.getElementById("editDuration").value = duration;
+        document.getElementById("editReason").value = reason;
+
+        document.getElementById("editModal").style.display = "block";
+    }
+
+    function closeEditModal() {
+        document.getElementById("editModal").style.display = "none";
+    }
+
+    // Close the modal if the user clicks anywhere outside of the modal
+    window.onclick = function(event) {
+        var modal = document.getElementById("editModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

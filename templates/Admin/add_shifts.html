@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+        }
+        header {
+            background-color: #DEB887;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #FFFAFA;
+            color: #fff;
+            padding-top: 20px;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 24px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #DEB887;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #555;
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form input[type="time"],
+        form button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form button {
+            background-color: #DEB887;
+            color: #000000;
+            border: none;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #DEB887;
+        }
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
+            border: 1px solid black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th, table td {
+            padding: 12px 16px;
+            text-align: center;
+            border: 1px solid black;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+            color: #555;
+            font-weight: bold;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+            color: #555;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        table td button {
+            padding: 8px 12px;
+            background-color: #DEB887;
+            color: #000;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        table td button:hover {
+            background-color: #c7a56d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+
+        .modal .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .modal .close:hover,
+        .modal .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            width: 150px;
+            text-align: right;
+        }
+
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Railway Management</h1>
+    <h3>{{ error }}</h3>
+</header>
+
+<div class="sidebar">
+    <a href="/admin_dashboard">Dashboard</a>
+    <a href="#" id="train-link">Trains</a>
+    <div class="sub-menu" id="train-submenu">
+        <a href="/add_train">Add Train</a>
+        <a href="/add_stations">Add Stations</a>
+        <a href="/add_seats">Add Seats</a>
+        <a href="/add_schedules">Add Schedules</a>
+        <a href="/add_routes">Add Routes</a>
+        <a href="/add_cancellations">Add Cancellations</a>
+        <a href="/add_delays">Add Delays</a>
+    </div>
+    <a href="#" id="employee-link">Employees</a>
+    <div class="sub-menu1" id="employee-submenu">
+        <a href="/add_departments">Add Departments</a>
+        <a href="/add_employees">Add Employees</a>
+        <a href="/add_shifts">Add Shifts</a>
+        <a href="/assignemployee_shifts">Add Employee Shifts</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Add Shift Details</h2>
+    <form action="/add_shifts" method="POST">
+        <div class="form-row">
+            <label for="start_time">Start Time:</label>
+            <input type="time" id="start_time" name="start_time" required>
+        </div>
+        <div class="form-row">
+            <label for="end_time">End Time:</label>
+            <input type="time" id="end_time" name="end_time" required>
+        </div>
+        <div class="form-row">
+            <label for="shift_name">Shift Name:</label>
+            <input type="text" id="shift_name" name="shift_name" required>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+
+    <hr>
+
+    <h2>Shift List</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Shift ID</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Shift Name</th>
+            <th>Edit</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for shift in shifts %}
+            <tr>
+                <td>{{ shift[0] }}</td>
+                <td>{{ shift[1] }}</td>
+                <td>{{ shift[2] }}</td>
+                <td>{{ shift[3] }}</td>
+                <td><button class="editBtn" data-id="{{ shift[0] }}" data-start-time="{{ shift[1] }}" data-end-time="{{ shift[2] }}" data-name="{{ shift[3] }}">Edit</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Shift</h2>
+        <form id="editForm" action="/edit_shift" method="POST">
+            <div class="form-row">
+                <label for="editShiftId">Shift Id:</label>
+                <input type="number" id="editShiftId" name="editShiftId" readonly>
+            </div>
+            <div class="form-row">
+                <label for="editStartTime">Start Time:</label>
+                <input type="time" id="editStartTime" name="start_time" required>
+            </div>
+            <div class="form-row">
+                <label for="editEndTime">End Time:</label>
+                <input type="time" id="editEndTime" name="end_time" required>
+            </div>
+            <div class="form-row">
+                <label for="editShiftName">Shift Name:</label>
+                <input type="text" id="editShiftName" name="shift_name" required>
+            </div>
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Modal functionality for editing shifts
+    var modal = document.getElementById("editModal");
+    var closeModal = document.getElementsByClassName("close")[0];
+    var editButtons = document.querySelectorAll(".editBtn");
+
+    // Open the modal and populate the fields with data from the clicked button
+    editButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+            var shiftId = button.getAttribute("data-id");
+            var startTime = button.getAttribute("data-start-time");
+            var endTime = button.getAttribute("data-end-time");
+            var shiftName = button.getAttribute("data-name");
+
+            document.getElementById("editShiftId").value = shiftId;
+            document.getElementById("editStartTime").value = startTime;
+            document.getElementById("editEndTime").value = endTime;
+            document.getElementById("editShiftName").value = shiftName;
+
+            modal.style.display = "block";
+        });
+    });
+
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

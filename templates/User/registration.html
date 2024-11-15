@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .login-link {
+            display: block;
+            margin-top: 10px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Register</h2>
+    <h2>{{ error }}</h2>
+    <form action="/register" method="POST">
+        <!-- Name Input -->
+        <input type="text" name="name" placeholder="Full Name" required>
+
+        <!-- Email Input -->
+        <input type="email" name="mail" placeholder="Email" required>
+
+        <!-- Mobile Number Input -->
+        <input type="tel" name="mobileNumber" placeholder="Mobile Number" pattern="[0-9]{10}" required>
+
+        <!-- Address Input -->
+        <input type="text" name="address" placeholder="Address" required>
+
+        <!-- City Input -->
+        <input type="text" name="city" placeholder="City" required>
+
+        <!-- State Input -->
+        <input type="text" name="state" placeholder="State" required>
+
+        <!-- Country Input -->
+        <input type="text" name="country" placeholder="Country" required>
+
+        <!-- Zipcode Input -->
+        <input type="number" name="zipcode" placeholder="Zipcode" required>
+
+        <!-- Password Input -->
+        <input type="password" name="user_password" placeholder="Password" required>
+
+        <!-- Submit Button -->
+        <button type="submit">Register</button>
+    </form>
+
+    <!-- Login Link for Existing Users -->
+    <p>Already have an account? <a href="/login" class="login-link">Login here</a></p>
+</div>
+
+</body>
+</html>

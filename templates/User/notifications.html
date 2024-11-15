@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking List</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-header {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .btn-view {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-view:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="content-header">
+        <h1>Notifications List</h1>
+        <p>Here you can see all your notifications.</p>
+    </div>
+
+    <!-- Check if there are bookings -->
+    {% if notification_ids|length > 0 %}
+        <table>
+            <thead>
+            <tr>
+                <th>Notification ID</th>
+                <th>Notification Description</th>
+                <th>Notification Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for notification_id in notification_ids %}
+                <tr>
+                    <td>{{ notification_id[0] }}</td>
+                    <td>{{ notification_id[1] }}</td>
+                    <td>{{ notification_id[2] }}</td>
+                    <td>{{ notification_id[3] }}</td>
+                    <td><a href="/notifications/{{ notification_id[0] }}" class="btn-view">View Details</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No bookings available.</p>
+    {% endif %}
+</div>
+
+</body>
+
+</html>

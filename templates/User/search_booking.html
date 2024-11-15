@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and Book Train Tickets</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        select {
+            background-color: #f9f9f9;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .train-list {
+            margin-top: 30px;
+        }
+
+        .train-card {
+            display: flex;
+            justify-content: space-between;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+
+        .train-card:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .train-info {
+            width: 70%;
+        }
+
+        .train-info h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            color: #34495e;
+        }
+
+        .train-info p {
+            margin-bottom: 8px;
+            color: #7f8c8d;
+        }
+
+        .book-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .book-btn:hover {
+            background-color: #2ecc71;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Search and Book Train Tickets</h1>
+    <h1>{{ error }}</h1>
+    <!-- Search Form -->
+    <form id="search-form">
+        <div class="form-group">
+            <label for="train-id">Train ID (Optional)</label>
+            <input type="text" id="train-id" name="train_id" placeholder="Enter Train ID">
+        </div>
+
+        <div class="form-group">
+            <label for="journey-date">Journey Start Date</label>
+            <input type="date" id="journey-date" name="journey_start_date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="source">Source Station</label>
+            <select id="source" name="source">
+                <option value="">Select Source Station</option>
+                {% for station in stations %}
+                    <option value="{{ station[0] }}">{{ station[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="destination">Destination Station</label>
+            <select id="destination" name="destination">
+                <option value="">Select Destination Station</option>
+                {% for station in stations %}
+                    <option value="{{ station[0] }}">{{ station[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="search-btn">Search Trains</button>
+    </form>
+
+
+<hr>
+    {% if details|length > 0 %}
+<h2>Available Trains in given routes</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Train ID</th>
+        <th>Train Name</th>
+        <th>Start Point</th>
+        <th>End Point</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Book</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for detail in details %}
+        <tr>
+            <td>{{ detail[0] }}</td>
+            <td>{{ detail[1] }}</td>
+            <td>{{ detail[2] }}</td>
+            <td>{{ detail[3] }}</td>
+            <td>{{ detail[4] }}</td>
+            <td>{{ detail[5] }}</td>
+
+            <td>
+                <button class="edit-button" onclick="openEditModal({{ detail[0] }}, '{{ detail[1] }}', '{{ detail[2] }}', '{{ detail[3] }}', '{{ detail[4] }}', '{{ detail[5] }}')">Book</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+</div>
+</body>
+</html>
