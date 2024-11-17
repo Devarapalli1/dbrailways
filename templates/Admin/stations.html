@@ -17,25 +17,21 @@
             padding: 15px 0;
             text-align: center;
         }
-        .main-container{
+        .main-container {
             display: flex;
         }
-        /* Sidebar styles */
         .sidebar {
             width: 250px;
             height: 100vh;
             background-color: #FFFAFA;
             color: #fff;
             padding-top: 20px;
-
         }
-
         .sidebar h2 {
             text-align: center;
             margin-bottom: 40px;
             font-size: 24px;
         }
-
         .sidebar a {
             display: block;
             padding: 15px;
@@ -44,18 +40,15 @@
             font-size: 18px;
             transition: background-color 0.3s;
         }
-
         .sidebar a:hover {
             background-color: #DEB887;
         }
         .container {
-            width: 100%; /* Makes the container take up the full width */
-            padding: 20px; /* Adds 20px padding inside the container */
-            background-color: #fff; /* White background color */
-            border-radius: 8px; /* Rounded corners */
-
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
         }
-
         h1, h2 {
             text-align: center;
             color: #333;
@@ -85,60 +78,43 @@
         form button:hover {
             background-color: #DEB887;
         }
-        /* Table styling to match the form layout */
         table {
-            width: 100%; /* Ensure the table takes up full width of its container */
-            max-width: 900px;  /* Similar max-width as the form container */
-            margin: 20px auto;  /* Center the table with space on top */
-            border: 1px solid black;  /* Light border around the table */
-            border-radius: 8px;  /* Rounded corners to match the form */
-            overflow: hidden;  /* Ensures rounded corners are visible */
-        }
-
-        /* Table header and cells styling */
-        table th, table td {
-            padding: 12px 16px;  /* Similar padding to form fields */
-            text-align: center;  /* Center the text inside cells */
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
             border: 1px solid black;
-            /* Same border style as form inputs */
+            border-radius: 8px;
+            overflow: hidden;
         }
-
-        /* Table header styling */
+        table th, table td {
+            padding: 12px 16px;
+            text-align: center;
+            border: 1px solid black;
+        }
         table th {
-            background-color: #f4f4f4;  /* Light background for header */
-            color: #555;  /* Dark text color for contrast */
+            background-color: #f4f4f4;
+            color: #555;
             font-weight: bold;
-            border: 1px solid ;
+            border: 1px solid;
         }
-
-        /* Alternate row color */
         table tr:nth-child(even) {
             background-color: #f9f9f9;
-            color: #555;/* Light background for even rows */
-            border: 1px solid ;
+            color: #555;
         }
-
-        /* Hover effect on table rows */
         table tr:hover {
-            background-color: #f1f1f1;  /* Highlight row on hover */
-
+            background-color: #f1f1f1;
         }
-
-        /* Button styling inside the table (e.g., for Edit buttons) */
         table td button {
-            padding: 8px 12px;  /* Padding for the buttons */
-            background-color: #DEB887;  /* Match the button color */
-            color: #000;  /* Dark button text */
+            padding: 8px 12px;
+            background-color: #DEB887;
+            color: #000;
             border: 1px solid #ddd;
             cursor: pointer;
-            border-radius: 5px;  /* Rounded button corners */
+            border-radius: 5px;
         }
-
         table td button:hover {
-            background-color: #c7a56d;  /* Darker color on hover */
+            background-color: #c7a56d;
         }
-
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -148,7 +124,6 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0,0,0);
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
         }
@@ -179,38 +154,27 @@
         }
         form {
             display: flex;
-            flex-wrap: wrap; /* Allow the form to wrap if necessary */
-            gap: 20px;  /* Space between each field */
-            align-items: center;  /* Vertically center items */
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
         }
-
         .form-row {
             display: flex;
-            gap: 10px;  /* Space between label and input */
-            align-items: center;  /* Vertically center label and input */
+            gap: 10px;
+            align-items: center;
         }
-
         label {
             width: 150px;
-            text-align: right; /* Align label text to the right */
+            text-align: right;
         }
-
         input {
             flex: 1;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        .form-row {
-            display: flex;
-            gap: 10px;  /* Space between label and input */
-            align-items: center;  /* Vertically center label and input */
-        }
-
-
     </style>
 </head>
-
 <body>
 <header>
     <h1>Railway Management</h1>
@@ -228,8 +192,7 @@
             <a href="/add_routes">Add Routes</a>
             <a href="/add_cancellations">Add Cancellations</a>
             <a href="/add_delays">Add Delays</a>
-            <a href="/add_maintenance">Add Maintanance</a>
-
+            <a href="/add_maintenance">Add Maintenance</a>
         </div>
         <a href="#" id="employee-link">Employees</a>
         <div class="sub-menu1" id="employee-submenu">
@@ -240,136 +203,161 @@
         </div>
     </div>
     <div class="container">
-<h1>Add Station</h1>
-<form action="/add_stations" method="POST">
-    <div class="form-row">
-    <label for="name">Station Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
-    </div>
-    <div class="form-row">
-    <label for="address">Address:</label>
-    <input type="text" id="address" name="address" required><br><br>
-    </div>
-    <div class="form-row">
-    <label for="city">City:</label>
-    <input type="text" id="city" name="city" required><br><br>
-    </div>
-    <div class="form-row">
-    <label for="state">State:</label>
-    <input type="text" id="state" name="state" required><br><br>
-    </div>
-    <div class="form-row">
-    <label for="country">Country:</label>
-    <input type="text" id="country" name="country" required><br><br>
-    </div>
-    <div class="form-row">
-    <label for="zipcode">Zip Code:</label>
-    <input type="text" id="zipcode" name="zipcode" required><br><br>
-    </div>
-
-    <button type="submit">Add Station</button>
-</form>
-
-<hr>
-
-<h2>Station List</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Station ID</th>
-        <th>Name</th>
-        <th>Address</th>
-        <th>City</th>
-        <th>State</th>
-        <th>Country</th>
-        <th>Zip Code</th>
-        <th>Edit</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for station in stations %}
-        <tr>
-            <td>{{ station[0] }}</td>
-            <td>{{ station[1] }}</td>
-            <td>{{ station[2] }}</td>
-            <td>{{ station[3] }}</td>
-            <td>{{ station[4] }}</td>
-            <td>{{ station[5] }}</td>
-            <td>{{ station[6] }}</td>
-            <td>
-                <button onclick="openEditModal({{ station[0] }}, '{{ station[1] }}', '{{ station[2] }}', '{{ station[3] }}', '{{ station[4] }}', '{{ station[5] }}', '{{ station[6] }}')">Edit</button>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<!-- Edit Station Modal -->
-<div id="myModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2>Edit Station</h2>
-        <form id="editForm" action="/edit_stations" method="POST">
+        <h1>Add Station</h1>
+        <form action="/add_stations" method="POST">
             <div class="form-row">
-                <label for="editStationId">Station Id:</label>
-                <input type="text" id="editStationId" name="station_id" readonly><br><br>
-            </div>
-
-            <div class="form-row">
-            <label for="editName">Station Name:</label>
-            <input type="text" id="editName" name="name" required><br><br>
+                <label for="name">Station Name:</label>
+                <input type="text" id="name" name="name" required>
             </div>
             <div class="form-row">
-            <label for="editAddress">Address:</label>
-            <input type="text" id="editAddress" name="address" required><br><br>
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" required>
             </div>
             <div class="form-row">
-            <label for="editCity">City:</label>
-            <input type="text" id="editCity" name="city" required><br><br>
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" required>
             </div>
             <div class="form-row">
-            <label for="editState">State:</label>
-            <input type="text" id="editState" name="state" required><br><br>
+                <label for="state">State:</label>
+                <input type="text" id="state" name="state" required>
             </div>
             <div class="form-row">
-            <label for="editCountry">Country:</label>
-            <input type="text" id="editCountry" name="country" required><br><br>
+                <label for="country">Country:</label>
+                <input type="text" id="country" name="country" required>
             </div>
             <div class="form-row">
-            <label for="editZipcode">Zip Code:</label>
-            <input type="text" id="editZipcode" name="zipcode" required><br><br>
+                <label for="zipcode">Zip Code:</label>
+                <input type="text" id="zipcode" name="zipcode" required>
             </div>
-
-            <button type="submit">Update Station</button>
+            <button type="submit">Add Station</button>
         </form>
-    </div>
-</div>
+        <hr>
+        <h2>Station List</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Station ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
+                <th>Zip Code</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for station in stations %}
+                <tr>
+                    <td>{{ station[0] }}</td>
+                    <td>{{ station[1] }}</td>
+                    <td>{{ station[2] }}</td>
+                    <td>{{ station[3] }}</td>
+                    <td>{{ station[4] }}</td>
+                    <td>{{ station[5] }}</td>
+                    <td>{{ station[6] }}</td>
+                    <td>
+                        <button onclick="openEditModal({{ station[0] }}, '{{ station[1] }}', '{{ station[2] }}', '{{ station[3] }}', '{{ station[4] }}', '{{ station[5] }}', '{{ station[6] }}')">Edit</button>
+                    </td>
+                    <td>
+                        <button onclick="openDeleteModal({{ station[0] }}, '{{ station[1] }}')">Delete</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-<script>
-    function openEditModal(stationId, name, address, city, state, country, zipcode) {
-        document.getElementById("editStationId").value = stationId;
-        document.getElementById("editName").value = name;
-        document.getElementById("editAddress").value = address;
-        document.getElementById("editCity").value = city;
-        document.getElementById("editState").value = state;
-        document.getElementById("editCountry").value = country;
-        document.getElementById("editZipcode").value = zipcode;
+        <!-- Edit Station Modal -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Edit Station</h2>
+                <form id="editForm" action="/edit_stations" method="POST">
+                    <div class="form-row">
+                        <label for="editStationId">Station Id:</label>
+                        <input type="text" id="editStationId" name="station_id" readonly>
+                    </div>
+                    <div class="form-row">
+                        <label for="editName">Station Name:</label>
+                        <input type="text" id="editName" name="name" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="editAddress">Address:</label>
+                        <input type="text" id="editAddress" name="address" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="editCity">City:</label>
+                        <input type="text" id="editCity" name="city" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="editState">State:</label>
+                        <input type="text" id="editState" name="state" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="editCountry">Country:</label>
+                        <input type="text" id="editCountry" name="country" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="editZipcode">Zip Code:</label>
+                        <input type="text" id="editZipcode" name="zipcode" required>
+                    </div>
+                    <button type="submit">Update Station</button>
+                </form>
+            </div>
+        </div>
 
-        document.getElementById("myModal").style.display = "block";
-    }
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+                <h2>Confirm Deletion</h2>
+                <p>Are you sure you want to delete station <span id="deleteStationName"></span>?</p>
+                <form id="deleteForm" action="/delete_station" method="POST">
+                    <input type="hidden" id="deleteStationId" name="station_id">
+                    <button type="submit">Yes, Delete</button>
+                    <button type="button" onclick="closeDeleteModal()">Cancel</button>
+                </form>
+            </div>
+        </div>
 
-    function closeModal() {
-        document.getElementById("myModal").style.display = "none";
-    }
+        <script>
+            function openEditModal(stationId, name, address, city, state, country, zipcode) {
+                document.getElementById("editStationId").value = stationId;
+                document.getElementById("editName").value = name;
+                document.getElementById("editAddress").value = address;
+                document.getElementById("editCity").value = city;
+                document.getElementById("editState").value = state;
+                document.getElementById("editCountry").value = country;
+                document.getElementById("editZipcode").value = zipcode;
+                document.getElementById("myModal").style.display = "block";
+            }
 
-    window.onclick = function(event) {
-        var modal = document.getElementById("myModal");
-        if (event.target == modal) {
-            closeEditModal();
-        }
-    }
-</script>
+            function closeModal() {
+                document.getElementById("myModal").style.display = "none";
+            }
 
+            function openDeleteModal(stationId, stationName) {
+                document.getElementById("deleteStationId").value = stationId;
+                document.getElementById("deleteStationName").innerText = stationName;
+                document.getElementById("deleteModal").style.display = "block";
+            }
+
+            function closeDeleteModal() {
+                document.getElementById("deleteModal").style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                var editModal = document.getElementById("myModal");
+                var deleteModal = document.getElementById("deleteModal");
+                if (event.target == editModal) {
+                    closeModal();
+                }
+                if (event.target == deleteModal) {
+                    closeDeleteModal();
+                }
+            }
+        </script>
     </div>
 </div>
 </body>

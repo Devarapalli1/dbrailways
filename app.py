@@ -1,19 +1,15 @@
 from flask import flash, Flask, render_template, request, redirect, url_for,session
 from flask_mysqldb import MySQL
 import datetime
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 app = Flask(__name__)
 
 # MySQL configuration
-app.config['MYSQL_HOST'] = os.getenv("MYSQL_HOST")
-app.config['MYSQL_USER'] = os.getenv("MYSQL_USER")
-app.config['MYSQL_PASSWORD'] = os.getenv("MYSQL_PASSWORD")
-app.config['MYSQL_DB'] = os.getenv("MYSQL_DB")
-app.secret_key = os.getenv("SECRET_KEY")
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Mysql@2024'
+app.config['MYSQL_DB'] = 'RailwayManagement'
+app.secret_key = 'BAD_SECRET_KEY'
 # Initialize MySQL
 mysql = MySQL(app)
 
@@ -416,6 +412,32 @@ def edit_stations():
     else:
         return redirect(url_for('admin_login'))
 
+@app.route('/delete_station', methods=['POST'])
+def delete_station():
+    if request.method == 'POST':
+        station_id = request.form['station_id']
+        cur = mysql.connection.cursor()
+        try:
+            # Check if the station exists
+            cur.execute("SELECT * FROM stations WHERE station_id = %s", (station_id,))
+            station = cur.fetchone()
+
+            if station is None:
+                return render_template('Admin/stations.html', error="Station not found.")
+
+            # Delete the station
+            cur.execute("DELETE FROM stations WHERE station_id = %s", (station_id,))
+            mysql.connection.commit()
+            return redirect(url_for('view_stations'))  # Redirect after success
+        except Exception as e:
+            mysql.connection.rollback()  # Rollback in case of an error
+            return f"Error: {str(e)}"
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))
+
+
 @app.route('/add_routes')
 def view_routes():
     cur = mysql.connection.cursor()
@@ -793,16 +815,16 @@ def user_dashboard():
     else:
         return redirect(url_for('user_login'))
 
-@app.route('/searchtrains')
-def searchtrains():
+@app.route('/search_booktrains')
+def search_booktrainsview():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM stations")
     stations = cur.fetchall()
     cur.close()
     return  render_template('User/search_booking.html',stations=stations)
 
-@app.route('/searchtrains', methods=['POST'])
-def searchbooktrains():
+@app.route('/search_booktrains', methods=['POST'])
+def search_booktrains():
     if request.method == 'POST':
         train_id = request.form['train_id']
         journey_start_date = request.form['journey_start_date']
@@ -811,7 +833,21 @@ def searchbooktrains():
         cur = mysql.connection.cursor()
         try:
             # Check if the email already exists
-            cur.execute("SELECT * FROM schedules WHERE source = %s AND destination= %s AND journey_start_date= %s", (source,destination,journey_start_date))
+            cur.execute("""
+               SELECT t.train_id, t.train_name, t.train_type, t.train_capacity, t.numOfCoaches, t.admin_id,
+               s.schedule_id, s.start_date, 
+               sp.name AS start_station_name,  -- Start station name
+               s.departure_time, 
+               ep.name AS end_station_name,    -- End station name
+               s.end_point, s.end_date, 
+               s.arrival_time, s.status, 
+               s.price, s.seats_available
+            FROM train t
+            JOIN schedules s ON t.train_id = s.train_id
+            LEFT JOIN stations sp ON s.start_point = sp.station_id  -- Join for start station
+            LEFT JOIN stations ep ON s.end_point = ep.station_id    -- Join for end station
+            WHERE s.start_point = %s AND s.end_point = %s AND s.start_date = %s""", (source, destination, journey_start_date))
+
             details = cur.fetchall()
 
             if details:
@@ -825,6 +861,102 @@ def searchbooktrains():
         finally:
             cur.close()
     return  render_template('User/search_booking.html')
+
+@app.route('/book_ticket/<int:schedule_id>', methods=['GET'])
+def book_ticket(schedule_id):
+    user_id =session['user_id']
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM schedules WHERE schedule_id = %s", (schedule_id,))
+    schedule_train = cursor.fetchone()
+    print(schedule_train)
+    cursor.close()
+    if schedule_train is None:
+        return "Train not found", 404
+    return render_template('User/tickets.html', schedule_id=schedule_id, schedule_train=schedule_train)
+
+@app.route('/submit_booking/<int:schedule_id>', methods=['POST'])
+def submit_booking(schedule_id):
+    user_id =session['user_id']
+    dependents_data = []
+    dependent_index = 1
+    date = datetime.strptime(request.json.get('date'), '%Y-%m-%d').date()
+    booking_time = datetime.strptime(request.json.get('booking_time'), '%H:%M').time()
+    status = "Pending"
+    while f'dependent_name_{dependent_index}' in request.form:
+        dependent_name = request.form.get(f'dependent_name_{dependent_index}')
+        email = request.form.get(f'email_{dependent_index}')
+        mobileNumber = request.form.get(f'mobileNumber_{dependent_index}')
+        age = request.form.get(f'age_{dependent_index}')
+
+        # Collect the dependent data
+        dependents_data.append((dependent_name, email, mobileNumber, age, user_id))
+        dependent_index += 1
+        cur = mysql.connection.cursor()
+
+        cur.execute("INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id) VALUES (%s, %s, %s, %s, %s)",(dependent_name, email, mobileNumber, age, user_id))
+        cur.execute("INSERT INTO booking (user_id, date, booking_time, status) VALUES (%s, %s, %s, %s) ",(user_id, date, booking_time, status))
+
+        booking_id = cur.lastrowid
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('payment', booking_id=booking_id))
+
+@app.route('/payment/<int:booking_id>', methods=['GET', 'POST'])
+def payment(booking_id):
+    if request.method == 'POST':
+        payment_type = request.form['payment_type']
+        address = request.form['address']
+        city = request.form['city']
+        state = request.form['state']
+        country = request.form['country']
+        zipcode = request.form['zipcode']
+        cardNumber = request.form['cardNumber']
+        pay_status = 'pending'  # Default payment status
+
+        # Create a cursor to interact with the MySQL database
+        cur = mysql.connection.cursor()
+
+        # Insert payment details into the Payment table
+        cur.execute("""
+            INSERT INTO payment (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, date, time, booking_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, datetime.today().date(), datetime.today().time(), booking_id))
+
+        # Commit the transaction
+        mysql.connection.commit()
+
+        # Get the payment ID of the newly inserted payment
+        payment_id = cur.lastrowid
+
+        # Close the cursor
+        cur.close()
+
+        flash('Payment processed successfully!', 'success')
+        return redirect(url_for('payment_success', payment_id=payment_id))
+
+    return render_template('payment.html', booking_id=booking_id)
+
+@app.route('/payment_success/<int:payment_id>', methods=['GET'])
+def payment_success(payment_id):
+    # Create a cursor to interact with the MySQL database
+    cur = mysql.connection.cursor()
+
+    # Query the payment data
+    cur.execute("SELECT * FROM payment WHERE payment_id = %s", [payment_id])
+    payment = cur.fetchone()
+
+    # Close the cursor
+    cur.close()
+
+    return render_template('payment_success.html', payment=payment)
+
+@app.route('/booking_confirmation/<int:schedule_id>', methods=['GET'])
+def booking_confirmation(schedule_id):
+    return render_template('User/confirmation.html', schedule_id=schedule_id)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/booking_history')
 def booking_history():

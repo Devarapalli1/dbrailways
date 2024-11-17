@@ -185,50 +185,39 @@
 <div class="main-container">
     <div class="sidebar">
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
-        <a href="/search_booktrains" id="booking-link">Book Tickets</a>
+        <a href="/tickets" id="booking-link">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
         <a href="/payments" id="payment-link">Payments</a>
     </div>
+    <div class="container">
+        <h1>Payment for Booking</h1>
+        <form method="POST">
+            <label for="payment_type">Payment Type:</label>
+            <input type="text" name="payment_type" required><br><br>
 
-<div class="container">
-    <div class="content-header">
-        <h1>Payments History</h1>
+            <label for="address">Address:</label>
+            <input type="text" name="address" required><br><br>
+
+            <label for="city">City:</label>
+            <input type="text" name="city" required><br><br>
+
+            <label for="state">State:</label>
+            <input type="text" name="state" required><br><br>
+
+            <label for="country">Country:</label>
+            <input type="text" name="country" required><br><br>
+
+            <label for="zipcode">Zipcode:</label>
+            <input type="text" name="zipcode" required><br><br>
+
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" name="cardNumber" required><br><br>
+
+            <button type="submit">Submit Payment</button>
+        </form>
     </div>
-
-    <!-- Check if there are payments -->
-    {% if payment_details|length > 0 %}
-        <table>
-            <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Payment Type</th>
-                <th>Booking Date</th>
-                <th>Start Point</th>
-                <th>End Point</th>
-                <th>Ticket</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for payment_detail in payment_details %}
-                <tr>
-                    <td>{{ payment_detail[9] }}</td>
-                    <td>{{ payment_detail[1] }}</td>
-                    <td>{{ payment_detail[10] }}</td>
-                    <td>{{ payment_detail[13] }}</td>
-                    <td>{{ payment_detail[14] }}</td>
-                    <td><a href="/payments/{{ payment_detail[0] }}" class="btn-view">View Details</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No payments available.</p>
-    {% endif %}
 </div>
-</div>
-
 </body>
-
 </html>
