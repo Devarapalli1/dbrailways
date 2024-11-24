@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Station Management</title>
     <style>
+        .sidebar a.active {
+            background-color: #DEB887 !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -186,7 +191,7 @@
         <a href="#" id="train-link">Trains</a>
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add Train</a>
-            <a href="/add_stations">Add Stations</a>
+            <a href="/add_stations" class="active">Add Stations</a>
             <a href="/add_seats">Add Seats</a>
             <a href="/add_schedules">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>

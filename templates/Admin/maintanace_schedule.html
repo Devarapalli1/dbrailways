@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maintenance Schedule Management</title>
     <style>
+        .sidebar a.active {
+            background-color: #DEB887 !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -228,7 +232,7 @@
         <a href="/add_routes">Add Routes</a>
         <a href="/add_cancellations">Add Cancellations</a>
         <a href="/add_delays">Add Delays</a>
-        <a href="/add_maintenance">Add Maintanance</a>
+        <a href="/add_maintenance" class="active">Add Maintanance</a>
 
     </div>
     <a href="#" id="employee-link">Employees</a>

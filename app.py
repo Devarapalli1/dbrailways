@@ -112,6 +112,14 @@ def edit_departments():
             return render_template('Admin/add_department.html', error="Invalid department ID. Please enter a valid number.")
         cur = mysql.connection.cursor()
         try:
+            cur.execute("SELECT * FROM department WHERE dept_name = %s;", (editDeptName,))
+            existing_dept = cur.fetchone()  # Fetch one record if it exists
+            cur.execute("SELECT * FROM department")
+            departments = cur.fetchall()
+
+            if existing_dept:
+                return render_template('Admin/add_department.html',departments=departments, error="This department name already exists. Try a different name.")
+
             # Update the department in the database
             cur.execute("UPDATE department SET dept_name = %s, admin_id = %s WHERE department_id = %s;",(editDeptName, admin_id, editDeptId))
             mysql.connection.commit()
@@ -284,7 +292,7 @@ def edit_maintenanceschedule():
 
 
 
-@app.route('/add_trainschedule')
+@app.route('/add_schedules')
 def view_trainschedule():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM schedules")
@@ -292,7 +300,7 @@ def view_trainschedule():
     cur.close()
     return render_template('Admin/train_schedule.html',schedules=schedules)
 
-@app.route('/add_trainschedule', methods=['POST'])
+@app.route('/add_schedules', methods=['POST'])
 def add_trainschedule():
     admin_id=session.get('admin_id')
     if admin_id:
@@ -441,7 +449,11 @@ def delete_station():
 @app.route('/add_routes')
 def view_routes():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM route")
+    #cur.execute("SELECT * FROM route")
+
+    cur.execute("""SELECT r.route_id, r.num_of_stationstops, r.distance, s1.name AS start_station, s2.name AS end_station FROM route r
+                    JOIN stations s1 ON r.start_station = s1.station_id
+                    JOIN stations s2 ON r.end_station = s2.station_id; """)
     routes = cur.fetchall()
     print(routes)# Fetch all records from the table
     cur.execute("SELECT * FROM stations")
@@ -457,20 +469,22 @@ def add_routes():
         distance = request.form['distance']
         start_station = request.form['start_station']
         end_station = request.form['end_station']
+
+
         cur = mysql.connection.cursor()
         try:
             # Inserting data into the database
             cur.execute("INSERT INTO route( num_of_stationstops,distance,start_station,end_station) VALUES( %s,%s,%s,%s)",
                         (num_of_stationstops,distance,start_station,end_station))
             mysql.connection.commit()
-            return redirect(url_for('view_stations'))  # Redirect after success
+            return redirect(url_for('view_routes'))  # Redirect after success
         except Exception as e:
             mysql.connection.rollback()  # Rollback in case of an error
             return f"Error: {str(e)}"
         finally:
             cur.close()
 
-        return render_template('Admin/stations.html')
+        return render_template('Admin/routes.html')
     else:
         return redirect(url_for('admin_login'))
 
@@ -478,10 +492,16 @@ def add_routes():
 @app.route('/assignemployee_shifts')
 def view_employeesshifts():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM employee_shifts")
-    employee_shifts = cur.fetchall()  # Fetch all records from the table
+    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name FROM employee_shifts es JOIN shifts s ON es.shift_id = s.shift_id
+        JOIN employee e ON es.employee_id = e.employee_id
+    """)
+    employee_shifts = cur.fetchall()
+    cur.execute("""SELECT * from shifts""")
+    shifts=cur.fetchall()
+    print(shifts)
+     # Fetch all records from the table
     cur.close()
-    return render_template('Admin/employee_shifts.html',error="This employee is already assigned to this shift.",employee_shifts=employee_shifts)
+    return render_template('Admin/employee_shifts.html',shifts=shifts,employee_shifts=employee_shifts)
 
 @app.route('/assignemployee_shifts', methods=['POST'])
 def assignemployee_shifts():
@@ -514,6 +534,54 @@ def assignemployee_shifts():
         return render_template('Admin/employee_shifts.html')
     else:
         return redirect(url_for('admin_login'))
+
+@app.route('/editemployee_shifts', methods=['POST'])
+def editemployee_shifts():
+    admin_id = session.get('admin_id')
+
+    if admin_id:
+        if request.method == 'POST':
+            editEmployeeId = request.form['editEmployeeId']
+            new_shift_id = request.form['editShiftName']
+            cur = mysql.connection.cursor()
+            cur.execute("""SELECT * from shifts""")
+            shifts=cur.fetchall()
+
+            try:
+                # Step 1: Check if the new shift assignment already exists
+                cur.execute("""SELECT * FROM employee_shifts WHERE employee_id = %s AND shift_id = %s""", (editEmployeeId, new_shift_id))
+
+                existing_shift = cur.fetchone()  # If this returns a row, it means the combination exists
+
+                if existing_shift:
+                    # If the combination already exists, send an error message
+                    return render_template('Admin/employee_shifts.html',
+                                           error="This employee is already assigned to this shift.",shifts=shifts)
+
+                # Step 2: Proceed to update the shift if combination doesn't exist
+                cur.execute("""UPDATE employee_shifts SET shift_id = %s WHERE employee_id = %s""", (new_shift_id, editEmployeeId))
+
+                # Commit the changes to the database
+                mysql.connection.commit()
+
+                # Redirect to the employee shifts view page after the update
+                return redirect(url_for('view_employeesshifts'))
+
+            except Exception as e:
+                # Rollback in case of an error
+                mysql.connection.rollback()
+                return f"Error: {str(e)}"
+
+            finally:
+                cur.close()
+
+        # Render the template if it's a GET request or after POST processing
+        return render_template('Admin/employee_shifts.html')
+
+    else:
+        # Redirect to login page if no admin_id in session
+        return redirect(url_for('admin_login'))
+
 
 
 @app.route('/add_train')
@@ -872,7 +940,7 @@ def book_ticket(schedule_id):
     cursor.close()
     if schedule_train is None:
         return "Train not found", 404
-    return render_template('User/tickets.html', schedule_id=schedule_id, schedule_train=schedule_train)
+    return render_template('User/book_tickets.html', schedule_id=schedule_id, schedule_train=schedule_train)
 
 @app.route('/submit_booking/<int:schedule_id>', methods=['POST'])
 def submit_booking(schedule_id):
@@ -899,7 +967,7 @@ def submit_booking(schedule_id):
         booking_id = cur.lastrowid
         mysql.connection.commit()
         cur.close()
-        return redirect(url_for('payment', booking_id=booking_id))
+        return redirect(url_for('booking_confirmation', booking_id=booking_id))
 
 @app.route('/payment/<int:booking_id>', methods=['GET', 'POST'])
 def payment(booking_id):
@@ -950,9 +1018,7 @@ def payment_success(payment_id):
 
     return render_template('payment_success.html', payment=payment)
 
-@app.route('/booking_confirmation/<int:schedule_id>', methods=['GET'])
-def booking_confirmation(schedule_id):
-    return render_template('User/confirmation.html', schedule_id=schedule_id)
+
 
 
 if __name__ == '__main__':
@@ -1046,7 +1112,6 @@ def payments():
 
     # Execute the query with the user_id
     cur.execute(query, (user_id,))
-
     # Fetch the results
     payment_details = cur.fetchall()
     print(payment_details)

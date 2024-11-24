@@ -5,79 +5,361 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Shifts Management</title>
     <style>
+        .sidebar a.active {
+            background-color: #DEB887 !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background:transparent;
+            height:40px;
+            border:1px solid #d8d8d8;
+            width:220px;
+            -webkit-appearance: none;
+        }
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
         }
+        header {
+            background-color: #DEB887;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        .main-container{
+            display: flex;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #FFFAFA;
+            color: #fff;
+            padding-top: 20px;
+
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 24px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #DEB887;
+        }
+        .container {
+            width: 100%; /* Makes the container take up the full width */
+            padding: 20px; /* Adds 20px padding inside the container */
+            background-color: #fff; /* White background color */
+            border-radius: 8px; /* Rounded corners */
+
+        }
+
         h1, h2 {
+            text-align: center;
             color: #333;
         }
-        form {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            background-color: #fff;
+        form label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #555;
         }
-        table {
+        form input[type="text"],
+        form input[type="number"],
+        form button {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #5cb85c;
-            color: white;
+        form button {
+            background-color: #DEB887;
+            color: #000000;
             border: none;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #4cae4c;
+        form button:hover {
+            background-color: #DEB887;
         }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        /* Table styling to match the form layout */
+        table {
+            width: 100%; /* Ensure the table takes up full width of its container */
+            max-width: 900px;  /* Similar max-width as the form container */
+            margin: 20px auto;  /* Center the table with space on top */
+            border: 1px solid black;  /* Light border around the table */
+            border-radius: 8px;  /* Rounded corners to match the form */
+            overflow: hidden;  /* Ensures rounded corners are visible */
+        }
+
+        /* Table header and cells styling */
+        table th, table td {
+            padding: 12px 16px;  /* Similar padding to form fields */
+            text-align: center;  /* Center the text inside cells */
+            border: 1px solid black;
+            /* Same border style as form inputs */
+        }
+
+        /* Table header styling */
+        table th {
+            background-color: #f4f4f4;  /* Light background for header */
+            color: #555;  /* Dark text color for contrast */
+            font-weight: bold;
+            border: 1px solid ;
+        }
+
+        /* Alternate row color */
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+            color: #555;/* Light background for even rows */
+            border: 1px solid ;
+        }
+
+        /* Hover effect on table rows */
+        table tr:hover {
+            background-color: #f1f1f1;  /* Highlight row on hover */
+
+        }
+
+        /* Button styling inside the table (e.g., for Edit buttons) */
+        table td button {
+            padding: 8px 12px;  /* Padding for the buttons */
+            background-color: #DEB887;  /* Match the button color */
+            color: #000;  /* Dark button text */
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 5px;  /* Rounded button corners */
+        }
+
+        table td button:hover {
+            background-color: #c7a56d;  /* Darker color on hover */
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .modal .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .modal .close:hover,
+        .modal .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap; /* Allow the form to wrap if necessary */
+            gap: 20px;  /* Space between each field */
+            align-items: center;  /* Vertically center items */
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;  /* Space between label and input */
+            align-items: center;  /* Vertically center label and input */
+        }
+
+        label {
+            width: 150px;
+            text-align: right; /* Align label text to the right */
+        }
+
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;  /* Space between label and input */
+            align-items: center;  /* Vertically center label and input */
+        }
+
+
     </style>
 </head>
 <body>
-
-<h1>Add Employee Shift Details</h1>
-<div>{{error}}</div>
-<form action="/assignemployee_shifts" method="POST">
+<header>
+    <h1>Railway Management</h1>
+    <h3>{{ error }}</h3>
+</header>
+<div class="main-container">
+    <div class="sidebar">
+        <a href="/admin_dashboard">Dashboard</a>
+        <a href="#" id="train-link">Trains</a>
+        <div class="sub-menu" id="train-submenu">
+            <a href="/add_train">Add Train</a>
+            <a href="/add_stations">Add Stations</a>
+            <a href="/add_seats">Add Seats</a>
+            <a href="/add_schedules">Add Schedules</a>
+            <a href="/add_routes">Add Routes</a>
+            <a href="/add_cancellations">Add Cancellations</a>
+            <a href="/add_delays">Add Delays</a>
+            <a href="/add_maintenance">Add Maintanance</a>
+        </div>
+        <a href="#" id="employee-link">Employees</a>
+        <div class="sub-menu1" id="employee-submenu">
+            <a href="/add_departments">Add Departments</a>
+            <a href="/add_employees">Add Employees</a>
+            <a href="/add_shifts">Add Shifts</a>
+            <a href="/assignemployee_shifts" class="active">Add Employee Shifts</a>
+        </div>
+    </div>
+    <div class="container">
+    <form action="/assignemployee_shifts" method="POST">
+    <div class="form-row">
     <label for="employeeId">Employee Id:</label>
     <input type="number" id="employee_id" name="employee_id" required><br><br>
-
+    </div>
+    <div class="form-row">
     <label for="shiftId">Shift Id:</label>
     <input type="number" id="shift_id" name="shift_id" required><br><br>
-
+    </div>
     <button type="submit">Add Shift</button>
 </form>
 
+
 <hr>
-
+        {% if employee_shifts|length > 0 %}
 <h2>Employee Shifts List</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Employee Id</th>
-        <th>Shift Id</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for employee_shift in employee_shifts %}
-        <tr>
-            <td>{{ employee_shift[0] }}</td>
-            <td>{{ employee_shift[1] }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
 
+    <table>
+        <thead>
+        <tr>
+            <th>Employee Id</th>
+            <th>Employee Name</th>
+            <th>Shift Name</th>
+            <th>Edit</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for employee_shift in employee_shifts %}
+            <tr>
+                <td>{{ employee_shift[0] }}</td>
+                <td>{{ employee_shift[1] }}</td>
+                <td>{{ employee_shift[2] }}</td>
+                <td><button class="editBtn" data-id="{{ employee_shift[0] }}" data-emp-name="{{ employee_shift[1] }}" data-shift-name="{{ employee_shift[2]}}">Edit</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        {% else %}
+            <p>No available.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Shift</h2>
+        <form id="editForm" action="/editemployee_shifts" method="POST">
+            <div class="form-row">
+                <label for="editEmployeeId">Employee Id:</label>
+                <input type="number" id="editEmployeeId" name="editEmployeeId" readonly>
+            </div>
+            <div class="form-row">
+                <label for="editEmployeeName">Employee Name:</label>
+                <input type="text" id="editEmployeeName" name="editEmployeeName" readonly>
+            </div>
+            <div class="form-row">
+                <label for="editShiftName">Shift Name:</label>
+                <select id="editShiftName" name="editShiftName" required>
+                    <option value="">Select Shift</option>
+                    {% for shift in shifts %}
+                        <option value="{{ shift[0] }}">{{ shift[3] }}</option>
+                    {% endfor %}
+
+                </select><br>
+            </div>
+
+
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+<script>
+    // Modal functionality for editing shifts
+    var modal = document.getElementById("editModal");
+    var closeModal = document.getElementsByClassName("close")[0];
+    var editButtons = document.querySelectorAll(".editBtn");
+
+    // Open the modal and populate the fields with data from the clicked button
+    editButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+            var empid = button.getAttribute("data-id");
+            var empname = button.getAttribute("data-emp-name");
+            var shiftName = button.getAttribute("data-shift-name");
+
+            document.getElementById("editEmployeeId").value = empid;
+            document.getElementById("editEmployeeName").value = empname;
+            document.getElementById("editShiftName").value = shiftName;
+
+            modal.style.display = "block";
+        });
+    });
+
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 </body>
 </html>

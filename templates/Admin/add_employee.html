@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Details</title>
     <style>
+        .sidebar a.active {
+            background-color: #DEB887 !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -228,11 +232,12 @@
         <a href="/add_routes">Add Routes</a>
         <a href="/add_cancellations">Add Cancellations</a>
         <a href="/add_delays">Add Delays</a>
+        <a href="/add_maintenance">Add Maintanance</a>
     </div>
     <a href="#" id="employee-link">Employees</a>
     <div class="sub-menu1" id="employee-submenu">
         <a href="/add_departments">Add Departments</a>
-        <a href="/add_employees">Add Employees</a>
+        <a href="/add_employees" class="active">Add Employees</a>
         <a href="/add_shifts">Add Shifts</a>
         <a href="/assignemployee_shifts">Add Employee Shifts</a>
     </div>
