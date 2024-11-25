@@ -267,6 +267,11 @@
             <button onclick="showModal('addStationModal')" style="background-color: #DEB887; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
                 Add Station to Route
             </button>
+
+            <!-- Delete Station from Route Button -->
+            <button onclick="showModal('deleteStationModal')" style="background-color: #DEB887; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Delete Station from Route
+            </button>
         </div>
 
     <hr>
@@ -369,6 +374,30 @@
     </div>
 </div>
 
+<!-- Delete Station from Route Modal -->
+<div id="deleteStationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('deleteStationModal')">&times;</span>
+        <h2>Delete Station from Route</h2>
+        <form id="deleteStationForm" action="/delete_station_from_route" method="POST">
+            <div class="form-row">
+                <label for="deleteRouteId">Route ID:</label>
+                <input type="number" id="deleteRouteId" name="route_id" min="1" required>
+            </div>
+            <div class="form-row">
+                <label for="deleteStationName">Station Name:</label>
+                <select id="deleteStationName" name="station_name" required>
+                    <option value="" disabled selected>Select Station</option>
+                    {% for station in stations %}
+                        <option value="{{ station[1] }}">{{ station[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Delete Station</button>
+        </form>
+    </div>
+</div>
+
 <!-- Edit Route Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -439,7 +468,7 @@
     }
 
     function handleOutsideClick(event) {
-        const modals = ['addModal', 'editModal', 'addStationModal', 'viewModal'];
+        const modals = ['addModal', 'editModal', 'addStationModal', 'deleteStationModal', 'viewModal'];
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (event.target === modal) closeModal(modalId);
@@ -481,6 +510,16 @@
         if (!routeId || !stationName) {
             event.preventDefault();
             alert("Both Route ID and Station Name are required. Please fill in the details.");
+        }
+    });
+
+    // Delete Station Form Validation
+    document.getElementById('deleteStationForm').addEventListener('submit', function (event) {
+        const routeId = document.getElementById('deleteRouteId').value;
+        const stationName = document.getElementById('deleteStationName').value;
+        if (!routeId || !stationName) {
+            event.preventDefault();
+            alert("Both Route ID and Station Name are required to delete a station.");
         }
     });
 

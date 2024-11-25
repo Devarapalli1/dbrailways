@@ -595,11 +595,30 @@ def add_station_to_route():
             flash("Station does not exist.", "error")
             return redirect('/add_routes')
 
+        # Check if the station is already part of the route
+        cursor.execute("""
+            SELECT COUNT(*) FROM route_stations 
+            WHERE route_id = %s AND station_id = %s
+        """, (route_id, station[0]))
+        station_exists = cursor.fetchone()[0]
+
+        if station_exists:
+            flash("This station is already part of the route.", "error")
+            return redirect('/add_routes')
+
         # Insert the station into the route
         cursor.execute(
             "INSERT INTO route_stations (route_id, station_id) VALUES (%s, %s)",
             (route_id, station[0])
         )
+
+        # Increase the number of station stops in the route
+        update_route_query = """
+            UPDATE route
+            SET num_of_stationstops = num_of_stationstops + 1
+            WHERE route_id = %s
+        """
+        cursor.execute(update_route_query, (route_id,))
         mysql.connection.commit()
         flash("Station successfully added to the route.", "success")
 
@@ -610,6 +629,76 @@ def add_station_to_route():
         cursor.close()
 
     return redirect('/add_routes')  # Replace with your relevant route
+
+@app.route('/delete_station_from_route', methods=['POST'])
+def delete_station_from_route():
+    route_id = request.form['route_id']
+    station_name = request.form.get('station_name')
+
+    cursor = mysql.connection.cursor()
+    try:
+        # Check if the route exists
+        cursor.execute("SELECT route_id FROM route WHERE route_id = %s", (route_id,))
+        route = cursor.fetchone()
+        if not route:
+            flash("Route ID does not exist.", "error")
+            return redirect('/add_routes')
+
+        # Check if the station exists
+        cursor.execute("SELECT station_id FROM stations WHERE name = %s", (station_name,))
+        station = cursor.fetchone()
+        if not station:
+            flash("Station does not exist.", "error")
+            return redirect('/add_routes')
+
+        station_id = station[0]
+
+        # Check if the station is the start or end station
+        start_end_check_query = """
+            SELECT start_station, end_station
+            FROM route 
+            WHERE route_id = %s
+        """
+        cursor.execute(start_end_check_query, (route_id,))
+        route_data = cursor.fetchone()
+
+        if route_data:
+            start_station_id, end_station_id = route_data
+            if station_id == start_station_id or station_id == end_station_id:
+                flash("Cannot delete the station because it is the start or end station of the route.", "error")
+                return redirect('/add_routes')
+
+        # Check if the station is part of the route (in route_stations table)
+        cursor.execute("""
+            SELECT COUNT(*) FROM route_stations 
+            WHERE route_id = %s AND station_id = %s
+        """, (route_id, station_id))
+        station_in_route = cursor.fetchone()[0]
+
+        if station_in_route == 0:
+            flash("This station is not part of the route.", "error")
+            return redirect('/add_routes')
+
+        # Delete the station from the route in the database
+        query = """
+            DELETE FROM route_stations
+            WHERE route_id = %s AND station_id = %s
+        """
+        cursor.execute(query, (route_id, station[0]))
+
+        # Decrease the number of station stops in the route
+        update_route_query = """
+            UPDATE route
+            SET num_of_stationstops = num_of_stationstops - 1
+            WHERE route_id = %s
+        """
+        cursor.execute(update_route_query, (route_id,))
+        mysql.connection.commit();
+
+        flash("Station successfully deleted from the route.", "success")
+    except Exception as e:
+        flash(f"An error occurred: {e}", "error")
+    return redirect('/add_routes')
 
 @app.route('/assignemployee_shifts')
 def view_employeesshifts():
