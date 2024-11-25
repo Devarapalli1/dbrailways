@@ -297,8 +297,12 @@ def view_trainschedule():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM schedules")
     schedules = cur.fetchall()  # Fetch all records from the table
+    cur.execute("SELECT * FROM train")
+    trains = cur.fetchall()
+    cur.execute("SELECT * FROM stations")
+    stations = cur.fetchall()
     cur.close()
-    return render_template('Admin/train_schedule.html',schedules=schedules)
+    return render_template('Admin/train_schedule.html',stations=stations,trains=trains,schedules=schedules)
 
 @app.route('/add_schedules', methods=['POST'])
 def add_trainschedule():
@@ -321,6 +325,42 @@ def add_trainschedule():
                 # Inserting data into the database
                 cur.execute("INSERT INTO schedules(start_date, start_point,departure_time,end_point,end_date,arrival_time,status,price,seats_available,train_id) VALUES(%s, %s, %s, %s,%s,%s,%s,%s,%s,%s)",
                             (start_date, start_point,departure_time,end_point,end_date,arrival_time,status,price,seats_available,train_id))
+                mysql.connection.commit()
+                return redirect(url_for('view_trainschedule'))  # Redirect after success
+            except Exception as e:
+                mysql.connection.rollback()  # Rollback in case of an error
+                return f"Error: {str(e)}"
+            finally:
+                cur.close()
+
+        return render_template('Admin/train_schedule.html')
+    else:
+        return redirect(url_for('admin_login'))
+
+
+@app.route('/edit_schedules', methods=['POST'])
+def edit_trainschedule():
+    admin_id=session.get('admin_id')
+    if admin_id:
+        if request.method == 'POST':
+            schedule_id=request.form['schedule_id']
+            start_date = request.form['start_date']
+            start_point = request.form['start_point']
+            departure_time = request.form['departure_time']
+            end_point = request.form['end_point']
+            end_date = request.form['end_date']
+            arrival_time = request.form['arrival_time']
+            status = request.form['status']
+            price = request.form['price']
+            seats_available = request.form['seats_available']
+            train_id = request.form['train_id']
+
+            cur = mysql.connection.cursor()
+            try:
+                # Inserting data into the database
+                cur.execute("""UPDATE schedules SET start_date = %s, start_point = %s, departure_time = %s, end_point = %s,end_date = %s,arrival_time = %s,status = %s,price = %s,seats_available = %s,train_id = %s
+                    WHERE schedule_id = %s""",
+                            (start_date, start_point, departure_time, end_point, end_date, arrival_time, status, price, seats_available, train_id,schedule_id))
                 mysql.connection.commit()
                 return redirect(url_for('view_trainschedule'))  # Redirect after success
             except Exception as e:
@@ -449,8 +489,6 @@ def delete_station():
 @app.route('/add_routes')
 def view_routes():
     cur = mysql.connection.cursor()
-    #cur.execute("SELECT * FROM route")
-
     cur.execute("""SELECT r.route_id, r.num_of_stationstops, r.distance, s1.name AS start_station, s2.name AS end_station FROM route r
                     JOIN stations s1 ON r.start_station = s1.station_id
                     JOIN stations s2 ON r.end_station = s2.station_id; """)
@@ -942,36 +980,33 @@ def book_ticket(schedule_id):
         return "Train not found", 404
     return render_template('User/book_tickets.html', schedule_id=schedule_id, schedule_train=schedule_train)
 
-@app.route('/submit_booking/<int:schedule_id>', methods=['POST'])
-def submit_booking(schedule_id):
-    user_id =session['user_id']
-    dependents_data = []
-    dependent_index = 1
-    date = datetime.strptime(request.json.get('date'), '%Y-%m-%d').date()
-    booking_time = datetime.strptime(request.json.get('booking_time'), '%H:%M').time()
-    status = "Pending"
-    while f'dependent_name_{dependent_index}' in request.form:
-        dependent_name = request.form.get(f'dependent_name_{dependent_index}')
-        email = request.form.get(f'email_{dependent_index}')
-        mobileNumber = request.form.get(f'mobileNumber_{dependent_index}')
-        age = request.form.get(f'age_{dependent_index}')
-
-        # Collect the dependent data
-        dependents_data.append((dependent_name, email, mobileNumber, age, user_id))
-        dependent_index += 1
-        cur = mysql.connection.cursor()
-
-        cur.execute("INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id) VALUES (%s, %s, %s, %s, %s)",(dependent_name, email, mobileNumber, age, user_id))
-        cur.execute("INSERT INTO booking (user_id, date, booking_time, status) VALUES (%s, %s, %s, %s) ",(user_id, date, booking_time, status))
-
-        booking_id = cur.lastrowid
-        mysql.connection.commit()
-        cur.close()
-        return redirect(url_for('booking_confirmation', booking_id=booking_id))
-
 @app.route('/payment/<int:booking_id>', methods=['GET', 'POST'])
 def payment(booking_id):
     if request.method == 'POST':
+        user_id =session['user_id']
+        dependents_data = []
+        dependent_index = 1
+        date = datetime.strptime(request.json.get('date'), '%Y-%m-%d').date()
+        booking_time = datetime.strptime(request.json.get('booking_time'), '%H:%M').time()
+        status = "Pending"
+        while f'dependent_name_{dependent_index}' in request.form:
+            dependent_name = request.form.get(f'dependent_name_{dependent_index}')
+            email = request.form.get(f'email_{dependent_index}')
+            mobileNumber = request.form.get(f'mobileNumber_{dependent_index}')
+            age = request.form.get(f'age_{dependent_index}')
+
+            # Collect the dependent data
+            dependents_data.append((dependent_name, email, mobileNumber, age, user_id))
+            dependent_index += 1
+            cur = mysql.connection.cursor()
+
+            cur.execute("INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id) VALUES (%s, %s, %s, %s, %s)",(dependent_name, email, mobileNumber, age, user_id))
+            cur.execute("INSERT INTO booking (user_id, date, booking_time, status) VALUES (%s, %s, %s, %s) ",(user_id, date, booking_time, status))
+
+            booking_id = cur.lastrowid
+            mysql.connection.commit()
+
+
         payment_type = request.form['payment_type']
         address = request.form['address']
         city = request.form['city']
@@ -1015,14 +1050,7 @@ def payment_success(payment_id):
 
     # Close the cursor
     cur.close()
-
     return render_template('payment_success.html', payment=payment)
-
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
 
 @app.route('/booking_history')
 def booking_history():
