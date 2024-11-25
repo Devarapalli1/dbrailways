@@ -1,4 +1,4 @@
-from flask import flash, Flask, render_template, request, redirect, url_for,session
+from flask import flash, Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_mysqldb import MySQL
 import datetime
 
@@ -502,18 +502,30 @@ def view_routes():
 @app.route('/add_routes', methods=['POST'])
 def add_routes():
     if request.method == 'POST':
-        #employee_id = request.form['employee_id']
-        num_of_stationstops = request.form['num_of_stationstops']
         distance = request.form['distance']
         start_station = request.form['start_station']
         end_station = request.form['end_station']
 
-
         cur = mysql.connection.cursor()
         try:
-            # Inserting data into the database
-            cur.execute("INSERT INTO route( num_of_stationstops,distance,start_station,end_station) VALUES( %s,%s,%s,%s)",
-                        (num_of_stationstops,distance,start_station,end_station))
+            # Insert into the route table
+            cur.execute(
+                "INSERT INTO route (num_of_stationstops, distance, start_station, end_station) VALUES (%s, %s, %s, %s)",
+                (2, distance, start_station, end_station)
+            )
+            # Get the route_id of the inserted route
+            route_id = cur.lastrowid
+
+            # Insert into the route_station table
+            cur.execute(
+                "INSERT INTO route_stations (route_id, station_id, stoptime) VALUES (%s, %s, %s)",
+                (route_id, start_station, 10)  # Adjust 'stop_time' value as needed
+            )
+            cur.execute(
+                "INSERT INTO route_stations (route_id, station_id, stoptime) VALUES (%s, %s, %s)",
+                (route_id, end_station, 10)  # Adjust 'stop_time' value as needed
+            )
+
             mysql.connection.commit()
             return redirect(url_for('view_routes'))  # Redirect after success
         except Exception as e:
@@ -526,6 +538,78 @@ def add_routes():
     else:
         return redirect(url_for('admin_login'))
 
+@app.route('/get_stations_for_route/<int:route_id>', methods=['GET'])
+def get_stations_for_route(route_id):
+    """
+    Endpoint to fetch stations for a given route ID.
+    """
+    cursor = mysql.connection.cursor()
+
+    try:
+        # Query to get all stations for the given route ID
+        query = """
+            SELECT s.name 
+            FROM route_stations rs
+            JOIN stations s ON rs.station_id = s.station_id
+            WHERE rs.route_id = %s
+            ORDER BY rs.station_id
+        """
+        cursor.execute(query, (route_id,))
+        stations = cursor.fetchall()
+
+        # Format the result as a JSON response
+        station_list = [{"name": station[0]} for station in stations]
+        return jsonify({"stations": station_list})
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Ensure the connection is closed
+        cursor.close()
+
+@app.route('/add_station_to_route', methods=['POST'])
+def add_station_to_route():
+    route_id = request.form.get('route_id')
+    station_name = request.form.get('station_name')
+
+    if not route_id or not station_name:
+        flash("Both Route ID and Station Name are required.", "error")
+        return redirect('/add_routes')  # Replace with your relevant route
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        # Check if the route exists
+        cursor.execute("SELECT route_id FROM route WHERE route_id = %s", (route_id,))
+        route = cursor.fetchone()
+        if not route:
+            flash("Route ID does not exist.", "error")
+            return redirect('/add_routes')
+
+        # Check if the station exists
+        cursor.execute("SELECT station_id FROM stations WHERE name = %s", (station_name,))
+        station = cursor.fetchone()
+        if not station:
+            flash("Station does not exist.", "error")
+            return redirect('/add_routes')
+
+        # Insert the station into the route
+        cursor.execute(
+            "INSERT INTO route_stations (route_id, station_id) VALUES (%s, %s)",
+            (route_id, station[0])
+        )
+        mysql.connection.commit()
+        flash("Station successfully added to the route.", "success")
+
+    except Exception as e:
+        flash(f"An error occurred: {e}", "error")
+
+    finally:
+        cursor.close()
+
+    return redirect('/add_routes')  # Replace with your relevant route
 
 @app.route('/assignemployee_shifts')
 def view_employeesshifts():
