@@ -192,11 +192,11 @@
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add Train</a>
             <a href="/add_stations" class="active">Add Stations</a>
-            <a href="/add_seats">Add Seats</a>
+            <a href="/add_seats">View Seats</a>
             <a href="/add_schedules">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations">Add Cancellations</a>
-            <a href="/add_delays">Add Delays</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
             <a href="/add_maintenance">Add Maintenance</a>
         </div>
         <a href="#" id="employee-link">Employees</a>
@@ -363,7 +363,38 @@
                 }
             }
         </script>
+
     </div>
 </div>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
 </body>
 </html>

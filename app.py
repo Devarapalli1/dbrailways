@@ -1,6 +1,9 @@
+from random import random
 from flask import flash, Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_mysqldb import MySQL
-import datetime
+from datetime import datetime
+import random
+
 
 app = Flask(__name__)
 
@@ -131,6 +134,31 @@ def edit_departments():
             cur.close()
     return render_template('Admin/add_department.html')
 
+@app.route('/delete_department', methods=['POST'])
+def delete_department():
+    if request.method == 'POST':
+        department_id = request.form['department_id']
+        cur = mysql.connection.cursor()
+        try:
+            # Check if the department exists
+            cur.execute("SELECT * FROM department WHERE department_id = %s", (department_id,))
+            department = cur.fetchone()
+
+            if department is None:
+                return render_template('Admin/departments.html', error="Department not found.")
+
+            # Delete the department
+            cur.execute("DELETE FROM department WHERE department_id = %s", (department_id,))
+            mysql.connection.commit()
+            return redirect(url_for('view_departments'))  # Redirect after success
+        except Exception as e:
+            mysql.connection.rollback()  # Rollback in case of an error
+            return f"Error: {str(e)}"
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))
+
 @app.route('/add_employees')
 def view_employees():
     cur = mysql.connection.cursor()
@@ -216,6 +244,24 @@ def edit_employees():
     else:
         return redirect(url_for('admin_login'))
 
+@app.route('/delete_employee', methods=['POST'])
+def delete_employee():
+    admin_id = session.get('admin_id')
+    if admin_id:
+        employee_id = request.form['employee_id']
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("UPDATE employee SET emp_status='Inactive' WHERE employee_id = %s", (employee_id,))
+            mysql.connection.commit()
+            return redirect(url_for('view_employees'))  # Redirect after success
+        except Exception as e:
+            mysql.connection.rollback()  # Rollback in case of an error
+            return f"Error: {str(e)}"
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))
+
 
 @app.route('/add_maintenance')
 def view_maintenanceschedule():
@@ -291,41 +337,109 @@ def edit_maintenanceschedule():
         return redirect(url_for('admin_login'))
 
 
+@app.route('/delete_maintenance/<int:maintenance_id>', methods=['POST'])
+def delete_maintenanceschedule(maintenance_id):
+    admin_id = session.get('admin_id')
+    if admin_id:
+        cur = mysql.connection.cursor()
+        try:
+            # Check if the maintenance record exists
+            cur.execute("SELECT * FROM maintenanceschedule WHERE id = %s", (maintenance_id,))
+            existing_record = cur.fetchone()
+
+            if existing_record:
+                # Delete the record from the database
+                cur.execute("DELETE FROM maintenanceschedule WHERE id = %s", (maintenance_id,))
+                mysql.connection.commit()  # Commit the changes to the database
+                flash("Maintenance schedule deleted successfully!", "success")
+            else:
+                flash("No record found with the provided ID.", "error")
+
+            return redirect(url_for('view_maintenanceschedule'))  # Redirect after success
+        except Exception as e:
+            mysql.connection.rollback()  # Rollback in case of an error
+            return f"Error: {str(e)}"
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))
 
 @app.route('/add_schedules')
 def view_trainschedule():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM schedules")
-    schedules = cur.fetchall()  # Fetch all records from the table
+    cur.execute(""" SELECT s.schedule_id, s.start_date, s.departure_time, s.end_date, s.arrival_time, s.status, s.price,
+    s.seats_available,s.train_id, st_start.name AS start_station_name, st_end.name AS end_station_name FROM schedules s 
+    JOIN stations st_start ON s.start_point = st_start.station_id
+    JOIN stations st_end ON s.end_point = st_end.station_id;""")
+    schedules = cur.fetchall()
     cur.execute("SELECT * FROM train")
     trains = cur.fetchall()
     cur.execute("SELECT * FROM stations")
     stations = cur.fetchall()
+    cur.execute("SELECT * FROM route")
+    routes = cur.fetchall()
     cur.close()
-    return render_template('Admin/train_schedule.html',stations=stations,trains=trains,schedules=schedules)
+    return render_template('Admin/train_schedule.html',routes=routes,stations=stations,trains=trains,schedules=schedules)
 
 @app.route('/add_schedules', methods=['POST'])
 def add_trainschedule():
-    admin_id=session.get('admin_id')
+    admin_id = session.get('admin_id')
     if admin_id:
         if request.method == 'POST':
-            start_date = request.form['start_date']
-            start_point = request.form['start_point']
-            departure_time = request.form['departure_time']
-            end_point = request.form['end_point']
-            end_date = request.form['end_date']
-            arrival_time = request.form['arrival_time']
-            status = request.form['status']
-            price = request.form['price']
-            seats_available = request.form['seats_available']
             train_id = request.form['train_id']
-
+            route_id = request.form['route_id']
+            start_date = request.form['start_dt']
+            end_date = request.form['end_dt']
+            price = request.form['price']
+            status = "Scheduled"
             cur = mysql.connection.cursor()
             try:
-                # Inserting data into the database
-                cur.execute("INSERT INTO schedules(start_date, start_point,departure_time,end_point,end_date,arrival_time,status,price,seats_available,train_id) VALUES(%s, %s, %s, %s,%s,%s,%s,%s,%s,%s)",
-                            (start_date, start_point,departure_time,end_point,end_date,arrival_time,status,price,seats_available,train_id))
+
+                start_datetime = f"{start_date[0:10]} {start_date[11:16]}"
+                end_datetime = f"{end_date[0:10]} {end_date[11:16]}"
+                cur.execute("""SELECT COUNT(*) FROM schedules  WHERE train_id = %s AND (
+                (CONCAT(start_date, ' ', departure_time) BETWEEN %s AND %s) OR
+                (CONCAT(end_date, ' ', arrival_time) BETWEEN %s AND %s) OR
+                (CONCAT(start_date, ' ', departure_time) <= %s AND CONCAT(end_date, ' ', arrival_time) >= %s))""",
+                (train_id, start_datetime, end_datetime, start_datetime, end_datetime, start_datetime, end_datetime))
+
+                if cur.fetchone()[0] > 0:
+                    flash("This train is already scheduled for this date range.", 'danger')
+                    return render_template('Admin/train_schedule.html')
+
+                cur.execute("""SELECT COUNT(*) FROM schedules WHERE train_id = %s AND start_date = %s AND departure_time = %s """, (train_id, start_date[0:10], start_date[11:16]))
+                if cur.fetchone()[0] > 0:
+                    flash("This train is already scheduled for this date and time.", 'danger')
+                    return render_template('Admin/train_schedule.html')
+
+
+                cur.execute("""SELECT COUNT(*) FROM schedules s JOIN route_schedules rs ON s.schedule_id = rs.schedule_id WHERE rs.route_id = %s AND s.start_date = %s""", (route_id, start_date))
+
+                if cur.fetchone()[0] > 0:
+                    flash("This route is already assigned to another train on the same date.", 'danger')
+                    return render_template('Admin/train_schedule.html')  # Re-render the form with the flash message
+
+
+                cur.execute("SELECT COUNT(*) AS seats_available FROM seats WHERE train_id = %s", (train_id,))
+                seats_available = cur.fetchone()[0]
+                cur.execute("""SELECT start_station, end_station FROM route WHERE route_id = %s """, (route_id,))
+                routes_info=cur.fetchone()
+                cur.execute("""INSERT INTO schedules (start_date, start_point,end_point,departure_time, end_date, arrival_time, status, price, seats_available, train_id)
+                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
+                """, (start_date[0:10],routes_info[0], routes_info[1],start_date[11:16], end_date[0:10], end_date[11:16], status, price, seats_available, train_id))
                 mysql.connection.commit()
+                cur.execute("SELECT LAST_INSERT_ID()")
+                schedule_id = cur.fetchone()[0]
+                cur.execute("""INSERT INTO route_schedules (route_id, schedule_id) VALUES (%s, %s) """, (route_id, schedule_id))
+                mysql.connection.commit()
+                cur.execute("""INSERT INTO train_schedules (train_id, schedule_id) VALUES (%s, %s)""", (train_id, schedule_id))
+                mysql.connection.commit()
+                cur.execute("""SELECT seat_id FROM seats WHERE train_id = %s """, (train_id,))
+                seats = cur.fetchall()
+                for seat in seats:
+                    seat_id = seat[0]
+                    cur.execute("""INSERT INTO scheduleseats (schedule_id, seat_id, availability_status) VALUES (%s, %s, %s)""", (schedule_id, seat_id, 'Available'))
+                    mysql.connection.commit()
                 return redirect(url_for('view_trainschedule'))  # Redirect after success
             except Exception as e:
                 mysql.connection.rollback()  # Rollback in case of an error
@@ -333,9 +447,9 @@ def add_trainschedule():
             finally:
                 cur.close()
 
-        return render_template('Admin/train_schedule.html')
+        return render_template('Admin/train_schedule.html')  # Render the schedule form page
     else:
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('admin_login'))  # Redirect to login page if admin is not logged in
 
 
 @app.route('/edit_schedules', methods=['POST'])
@@ -368,6 +482,7 @@ def edit_trainschedule():
                 return f"Error: {str(e)}"
             finally:
                 cur.close()
+
 
         return render_template('Admin/train_schedule.html')
     else:
@@ -489,9 +604,10 @@ def delete_station():
 @app.route('/add_routes')
 def view_routes():
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT r.route_id, r.num_of_stationstops, r.distance, s1.name AS start_station, s2.name AS end_station FROM route r
+    cur.execute("""SELECT r.route_id, r.num_of_stationstops, r.distance, s1.name AS start_station, s2.name AS end_station, s1.station_id AS start_station_id, s2.station_id AS end_station_id FROM route r
                     JOIN stations s1 ON r.start_station = s1.station_id
-                    JOIN stations s2 ON r.end_station = s2.station_id; """)
+                    JOIN stations s2 ON r.end_station = s2.station_id;""")
+
     routes = cur.fetchall()
     print(routes)# Fetch all records from the table
     cur.execute("SELECT * FROM stations")
@@ -805,44 +921,61 @@ def view_train():
 
 @app.route('/add_train', methods=['POST'])
 def add_train():
-    admin_id=session.get('admin_id')
+    admin_id = session.get('admin_id')
     if admin_id:
         if request.method == 'POST':
             train_id = request.form['train_id']
             train_name = request.form['train_name']
             train_type = request.form['train_type']
-            train_capacity = request.form['train_capacity']
+            train_capacity = int(request.form['train_capacity'])
             numOfCoaches = request.form['numOfCoaches']
-
             cur = mysql.connection.cursor()
             try:
                 cur.execute("SELECT COUNT(*) FROM train WHERE train_name = %s", (train_name,))
                 result = cur.fetchone()
-                cur.execute("SELECT COUNT(*) FROM train WHERE train_id= %s", (train_id,))
+                cur.execute("SELECT COUNT(*) FROM train WHERE train_id = %s", (train_id,))
                 result_id = cur.fetchone()
                 cur.execute("SELECT * FROM train")
                 trains = cur.fetchall()
-
                 if result[0] > 0:
-                    return render_template('Admin/add_train.html',trains=trains,error="Train name already exists, please use a different name")
-                # Inserting data into the database
+                    return render_template('Admin/add_train.html', trains=trains, error="Train name already exists, please use a different name")
+
                 elif result_id[0] > 0:
-                        return render_template('Admin/add_train.html',trains=trains,error="Train Id already exists, please use a different name")
-                # Inserting data into the database
+                    return render_template('Admin/add_train.html', trains=trains, error="Train ID already exists, please use a different ID")
+
                 else:
-                    cur.execute("INSERT INTO train(train_id, train_name, train_type, train_capacity, numOfCoaches,admin_id) VALUES(%s, %s, %s, %s, %s,%s)",
-                                (train_id, train_name, train_type, train_capacity, numOfCoaches,admin_id))
+                    cur.execute("INSERT INTO train(train_id, train_name, train_type, train_capacity, numOfCoaches, admin_id) VALUES(%s, %s, %s, %s, %s, %s)",
+                                (train_id, train_name, train_type, train_capacity, numOfCoaches, admin_id))
                     mysql.connection.commit()
+                    prices = {
+                        'SL': 100.00,  # Class A price
+                        'CC': 75.00,   # Class B price
+                        '2S': 50.00    # Class C price
+                    }
+                    seat_distribution = {
+                        'SL': int(train_capacity * 0.4),  # 40% for Class A
+                        'CC': int(train_capacity * 0.3),  # 30% for Class B
+                        '2S': int(train_capacity * 0.3)   # 30% for Class C
+                    }
+
+                    seat_number = 1
+                    for class_type, num_seats in seat_distribution.items():
+                        for i in range(num_seats):
+                            seat_identifier = f"{class_type}{i + 1}"
+                            cur.execute("INSERT INTO seats (seat_number, class, price, train_id) VALUES (%s, %s, %s, %s)",
+                                        (seat_identifier, class_type, prices[class_type], train_id))
+                    mysql.connection.commit()  # Commit the seat inserts
                     return redirect(url_for('view_train'))  # Redirect after success
             except Exception as e:
                 mysql.connection.rollback()  # Rollback in case of an error
                 return f"Error: {str(e)}"
             finally:
                 cur.close()
-
         return render_template('Admin/add_train.html')
+
     else:
         return redirect(url_for('admin_login'))
+
 
 @app.route('/update_train', methods=['POST'])
 def update_train():
@@ -863,7 +996,6 @@ def update_train():
                 result = cur.fetchone()
                 if result[0] > 0:
                     return render_template('Admin/add_train.html',trains=trains,error="Train name already exists, please use a different name")
-                # Inserting data into the database
                 else:
                     cur.execute("""UPDATE train SET train_name = %s,train_type = %s,train_capacity = %s,numOfCoaches = %s,admin_id = %s WHERE train_id = %s;""", (train_name, train_type, train_capacity, numOfCoaches, admin_id, train_id))
                     mysql.connection.commit()
@@ -897,7 +1029,6 @@ def add_shifts():
             end_time = request.form['end_time']
             cur = mysql.connection.cursor()
             try:
-                # Inserting data into the database
                 cur.execute("INSERT INTO shifts(shift_name, start_time, end_time) VALUES(%s, %s, %s)",
                             (shift_name, start_time, end_time))
                 mysql.connection.commit()
@@ -945,7 +1076,6 @@ def add_seats():
     else:
         return redirect(url_for('admin_login'))
 
-
 @app.route('/add_cancellations')
 def view_cancellations():
     cur = mysql.connection.cursor()
@@ -967,18 +1097,18 @@ def add_cancellations():
             cur = mysql.connection.cursor()
             try:
                 # Inserting data into the database
-                cur.execute("INSERT INTO seats(schedule_id, cancellation_date, reason) VALUES(%s, %s, %s)",
+                cur.execute("INSERT INTO cancellations(schedule_id, cancellation_date, reason) VALUES(%s, %s, %s)",
                             (schedule_id, cancellation_date, reason))
 
                 cur.execute("UPDATE schedules SET status = 'Canceled' WHERE schedule_id = %s;", (schedule_id,))
                 mysql.connection.commit()
-                return redirect(url_for('view_cancellations'))  # Redirect after success
+                return redirect(url_for('view_trainschedule'))  # Redirect after success
             except Exception as e:
                 mysql.connection.rollback()  # Rollback in case of an error
                 return f"Error: {str(e)}"
             finally:
                 cur.close()
-        return render_template('Admin/cancellations.html')
+        return render_template('Admin/train_schedule.html')
     else:
         return redirect(url_for('admin_login'))
 
@@ -1008,13 +1138,13 @@ def add_delays():
 
                 cur.execute("UPDATE schedules SET status = 'Delayed' WHERE schedule_id = %s;", (schedule_id,))
                 mysql.connection.commit()
-                return redirect(url_for('view_delays'))  # Redirect after success
+                return redirect(url_for('view_trainschedule'))  # Redirect after success
             except Exception as e:
                 mysql.connection.rollback()  # Rollback in case of an error
                 return f"Error: {str(e)}"
             finally:
                 cur.close()
-        return render_template('Admin/delay.html')
+        return render_template('Admin/train_schedule.html')
     else:
         return redirect(url_for('admin_login'))
 
@@ -1141,45 +1271,30 @@ def search_booktrains():
             cur.close()
     return  render_template('User/search_booking.html')
 
+
 @app.route('/book_ticket/<int:schedule_id>', methods=['GET'])
 def book_ticket(schedule_id):
     user_id =session['user_id']
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM schedules WHERE schedule_id = %s", (schedule_id,))
     schedule_train = cursor.fetchone()
-    print(schedule_train)
+    cursor.execute("SELECT DISTINCT class FROM seats")
+    seats = cursor.fetchall()
     cursor.close()
     if schedule_train is None:
         return "Train not found", 404
-    return render_template('User/book_tickets.html', schedule_id=schedule_id, schedule_train=schedule_train)
+    return render_template('User/book_tickets.html', seats=seats,schedule_id=schedule_id, schedule_train=schedule_train)
 
-@app.route('/payment/<int:booking_id>', methods=['GET', 'POST'])
-def payment(booking_id):
+@app.route('/submit_payment/<int:schedule_id>', methods=['GET', 'POST'])
+def submit_payment(schedule_id):
     if request.method == 'POST':
-        user_id =session['user_id']
+        user_id = session['user_id']
         dependents_data = []
         dependent_index = 1
-        date = datetime.strptime(request.json.get('date'), '%Y-%m-%d').date()
-        booking_time = datetime.strptime(request.json.get('booking_time'), '%H:%M').time()
-        status = "Pending"
-        while f'dependent_name_{dependent_index}' in request.form:
-            dependent_name = request.form.get(f'dependent_name_{dependent_index}')
-            email = request.form.get(f'email_{dependent_index}')
-            mobileNumber = request.form.get(f'mobileNumber_{dependent_index}')
-            age = request.form.get(f'age_{dependent_index}')
-
-            # Collect the dependent data
-            dependents_data.append((dependent_name, email, mobileNumber, age, user_id))
-            dependent_index += 1
-            cur = mysql.connection.cursor()
-
-            cur.execute("INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id) VALUES (%s, %s, %s, %s, %s)",(dependent_name, email, mobileNumber, age, user_id))
-            cur.execute("INSERT INTO booking (user_id, date, booking_time, status) VALUES (%s, %s, %s, %s) ",(user_id, date, booking_time, status))
-
-            booking_id = cur.lastrowid
-            mysql.connection.commit()
-
-
+        now = datetime.now()
+        pay_date = now.strftime('%Y-%m-%d %H:%M:%S')
+        booking_date = now.strftime('%Y-%m-%d')
+        seatclass = request.form['seatclass']
         payment_type = request.form['payment_type']
         address = request.form['address']
         city = request.form['city']
@@ -1187,43 +1302,108 @@ def payment(booking_id):
         country = request.form['country']
         zipcode = request.form['zipcode']
         cardNumber = request.form['cardNumber']
-        pay_status = 'pending'  # Default payment status
 
-        # Create a cursor to interact with the MySQL database
+        while f'dependent_name_{dependent_index}' in request.form:
+            dependent_name = request.form.get(f'dependent_name_{dependent_index}')
+            email = request.form.get(f'email_{dependent_index}')
+            mobileNumber = request.form.get(f'mobileNumber_{dependent_index}')
+            age = request.form.get(f'age_{dependent_index}')
+            dependents_data.append((dependent_name, email, mobileNumber, age))
+            dependent_index += 1
+
         cur = mysql.connection.cursor()
+        cur.execute("""SELECT train_id, price,seats_available FROM schedules WHERE schedule_id=%s;""", (schedule_id,))
+        journey_price = cur.fetchone()
 
-        # Insert payment details into the Payment table
-        cur.execute("""
-            INSERT INTO payment (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, date, time, booking_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, datetime.today().date(), datetime.today().time(), booking_id))
+        if journey_price:
+            train_id = journey_price[0]
+            journey_price = journey_price[1]
+        else:
+            flash('No schedule found with the given schedule_id.', 'danger')
+            return redirect(url_for('payment', schedule_id=schedule_id))
 
-        # Commit the transaction
-        mysql.connection.commit()
+        cur.execute("""SELECT price FROM seats WHERE train_id=%s AND class=%s;""", (train_id, seatclass))
+        seat_price = cur.fetchone()
 
-        # Get the payment ID of the newly inserted payment
-        payment_id = cur.lastrowid
+        if seat_price:
+            seat_price = seat_price[0]
+        else:
+            flash('No seats found for the given train and class.', 'danger')
+            return redirect(url_for('payment', schedule_id=schedule_id))
 
-        # Close the cursor
-        cur.close()
+        total_price = len(dependents_data) * (journey_price + seat_price)
+        print(f"Total Price for booking: ${total_price:.2f}")
 
-        flash('Payment processed successfully!', 'success')
-        return redirect(url_for('payment_success', payment_id=payment_id))
+        cur.execute("""SELECT COUNT(*) FROM scheduleseats ss JOIN seats s ON ss.seat_id = s.seat_id WHERE ss.schedule_id = %s AND ss.availability_status = 'Available' AND s.class = %s""",
+                    (schedule_id, seatclass))
+        available_seats_count = cur.fetchone()[0]
+        if available_seats_count>=len(dependents_data):
+            try:
+                cur.execute("""INSERT INTO booking (user_id, date, status) VALUES (%s, %s, %s)""", (user_id, booking_date, 'Confirmed'))
+                mysql.connection.commit()
+                booking_id = cur.lastrowid
 
-    return render_template('payment.html', booking_id=booking_id)
+                dependent_ids = []
+                for dependent_name, email, mobileNumber, age in dependents_data:
+                    cur.execute("""INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id, booking_id) 
+                                VALUES (%s, %s, %s, %s, %s, %s)""",
+                                (dependent_name, email, mobileNumber, age, user_id, booking_id))
+                    mysql.connection.commit()
+                    dependent_id = cur.lastrowid
+                    dependent_ids.append(dependent_id)
 
-@app.route('/payment_success/<int:payment_id>', methods=['GET'])
-def payment_success(payment_id):
-    # Create a cursor to interact with the MySQL database
-    cur = mysql.connection.cursor()
+                ticket_numbers = []
+                for dependent_id in dependent_ids:
+                    cur.execute("""SELECT ss.seat_id FROM scheduleseats ss 
+                                   JOIN seats s ON ss.seat_id = s.seat_id 
+                                   WHERE ss.schedule_id = %s AND ss.availability_status = 'Available' AND s.class = %s LIMIT 1""",
+                                (schedule_id, seatclass))
+                    seat = cur.fetchone()
 
-    # Query the payment data
-    cur.execute("SELECT * FROM payment WHERE payment_id = %s", [payment_id])
-    payment = cur.fetchone()
+                    if seat:
+                        seat_id = seat[0]
+                        ticket_number = f"TICKET{random.randint(1000, 9999)}"
+                        while True:
+                            cur.execute("SELECT COUNT(*) FROM ticket WHERE ticket_number = %s", (ticket_number,))
+                            if cur.fetchone()[0] == 0:
+                                break
+                            ticket_number = f"TICKET{random.randint(1000, 9999)}"
+                        cur.execute("""INSERT INTO ticket (ticket_number, booking_id, seat_id, schedule_id, issue_date, status, user_id, dependent_id) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                                    (ticket_number, booking_id, seat_id, schedule_id, datetime.today().date(), 'Issued', user_id, dependent_id))
+                        mysql.connection.commit()
 
-    # Close the cursor
-    cur.close()
-    return render_template('payment_success.html', payment=payment)
+                        cur.execute("""UPDATE scheduleseats SET availability_status = 'Booked' WHERE schedule_id = %s AND seat_id = %s""",
+                            (schedule_id, seat_id))
+                        mysql.connection.commit()
+
+                availseats=journey_price[2]-len(dependents_data)
+                cur.execute("""UPDATE schedules SET seats_available =%s  WHERE schedule_id = %s """,(availseats,schedule_id))
+                mysql.connection.commit()
+
+                # Insert payment details into the database
+                cur.execute("""INSERT INTO payment (pay_date, payment_type, address, city, state, country, zipcode, cardNumber, pay_status, booking_id) 
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                            (pay_date, payment_type, address, city, state, country, zipcode, cardNumber, 'Confirmed', booking_id))
+                mysql.connection.commit()
+
+                flash('Payment processed and booking successful!', 'success')
+                return render_template('User/confirmation.html',train_id=train_id, total_price=total_price, schedule_id=schedule_id, booking_id=booking_id)
+
+            except Exception as e:
+                # Rollback in case of an error
+                mysql.connection.rollback()
+                print(f"Error occurred: {e}")
+                flash('An error occurred while processing your booking. Please try again.', 'danger')
+                return redirect(url_for('submit_payment', schedule_id=schedule_id))
+
+            finally:
+                cur.close()
+        else:
+            return render_template('User/error.html')
+    return redirect(url_for('user_login'))
+
+
 
 @app.route('/booking_history')
 def booking_history():
@@ -1327,6 +1507,57 @@ def forgot_password():
 def user_booking():
     # Here you can render the user booking page, or just return a placeholder for now
     return render_template('User/user_login.html')
+
+@app.route('/delete_cancellation', methods=['POST'])
+def delete_cancellation():
+    if request.method == 'POST':
+        cancellation_id = request.form['cancellation_id']
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("DELETE FROM cancellations WHERE cancellation_id = %s", (cancellation_id,))
+            mysql.connection.commit()
+            flash("Cancellation deleted successfully!", "success")
+            return redirect(url_for('add_cancellations'))
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f"Error: {str(e)}", "error")
+            return redirect(url_for('add_cancellations'))
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))
+
+@app.route('/delete_delay', methods=['POST'])
+def delete_delay():
+    if request.method == 'POST':
+        delay_id = request.form['delay_id']
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("DELETE FROM delay WHERE delay_id = %s", (delay_id,))
+            mysql.connection.commit()
+            flash("Delay deleted successfully!", "success")
+            return redirect(url_for('add_delays'))  # Redirect to the view delays page after deletion
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f"Error: {str(e)}", "error")
+            return redirect(url_for('add_delays'))  # Redirect to the view delays page if an error occurs
+        finally:
+            cur.close()
+    else:
+        return redirect(url_for('admin_login'))  # Redirect to login if the request is not POST
+
+
+@app.route('/ulogout')
+def ulogout():
+    session.clear()
+    flash('You have been logged out successfully!', 'info')
+    return redirect(url_for('home'))  # Redirect to the login page after logout
+
+@app.route('/alogout')
+def alogout():
+    session.clear()
+    flash('You have been logged out successfully!', 'info')
+    return redirect(url_for('home'))  # Redirect to the login page after logout
 
 if __name__ == '__main__':
     app.run(debug=True)

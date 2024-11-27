@@ -6,6 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schedule Management</title>
     <style>
+        .flash-messages {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .flash {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .flash.danger {
+            background-color: #f44336; /* Red for error */
+        }
+
+        .flash.success {
+            background-color: #4CAF50; /* Green for success */
+        }
+
+        .flash.info {
+            background-color: #2196F3; /* Blue for informational messages */
+        }
+
         select {
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -230,6 +255,17 @@
     <h1>Railway Management</h1>
     <h3>{{ error }}</h3>
 </header>
+
+<!-- Flash message display section -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flash-messages">
+            {% for category, message in messages %}
+                <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 <div class="main-container">
     <div class="sidebar">
         <a href="/admin_dashboard">Dashboard</a>
@@ -237,11 +273,11 @@
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add/Edit Trains</a>
             <a href="/add_stations">Add Stations</a>
-            <a href="/add_seats">Add Seats</a>
+            <a href="/add_seats">View Seats</a>
             <a href="/add_schedules" class="active">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations">Add Cancellations</a>
-            <a href="/add_delays">Add Delays</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
             <a href="/add_maintenance">Add Maintanance</a>
 
         </div>
@@ -254,119 +290,106 @@
         </div>
     </div>
     <div class="container">
-    <h1>Add Schedule</h1>
-    <form action="/add_schedules" method="POST">
-    <div class="form-row">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" name="start_date" required><br><br>
-    </div>
 
-        <div class="form-row">
-            <label for="startPoint">Start Point:</label>
-            <select id="startPoint" name="start_point" required>
-                <option value="" disabled selected>Select Start Point</option>
-                {% for station in stations %}
-                    <option value="{{ station[0] }}">{{ station[1] }}</option>
-                {% endfor %}
-            </select><br><br>
-        </div>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
+            <!-- Add Route Button -->
+            <button onclick="showModal('addModal')" style="background-color: #DEB887; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Add Schedule
+            </button>
 
-        <div class="form-row">
-    <label for="departureTime">Departure Time:</label>
-    <input type="time" id="departureTime" name="departure_time" required><br><br>
-        </div>
+            <!-- Add Station to Route Button -->
+            <button onclick="showModal('addStationModal')" style="background-color: #DEB887; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Add Delay to Schedule
+            </button>
 
-        <div class="form-row">
-            <label for="endPoint">End Point:</label>
-            <select id="endPoint" name="end_point" required>
-                <option value="" disabled selected>Select End Point</option>
-                {% for station in stations %}
-                    <option value="{{ station[0] }}">{{ station[1] }}</option>
-                {% endfor %}
-            </select><br><br>
+            <!-- Delete Station from Route Button -->
+            <button onclick="showModal('deleteStationModal')" style="background-color: #DEB887; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Add Cancellation to Schedule
+            </button>
         </div>
+        <hr>
 
-
-        <div class="form-row">
-    <label for="endDate">End Date:</label>
-    <input type="date" id="endDate" name="end_date" required><br><br>
-        </div>
-        <div class="form-row">
-    <label for="arrivalTime">Arrival Time:</label>
-    <input type="time" id="arrivalTime" name="arrival_time" required><br><br>
-        </div>
-        <div class="form-row">
-    <label for="status">Status:</label>
-    <select id="status" name="status" required>
-        <option value="" disabled selected>Select status</option>
-        <option value="Scheduled">Scheduled</option>
-        <option value="Completed">Completed</option>
-        <option value="Cancelled">Cancelled</option>
-    </select><br><br>
-        </div>
-        <div class="form-row">
-    <label for="price">Price:</label>
-    <input type="number" step="0.01" id="price" name="price"  min="1" required><br><br>
-        </div>
-        <div class="form-row">
-    <label for="seatsAvailable">Seats Available:</label>
-    <input type="number" id="seatsAvailable" name="seats_available" min="1" required><br><br>
-        </div>
-        <div class="form-row">
-        <label for="trainId">Train Id:</label>
-        <select id="trainId" name="train_id" required>
-            <option value="" disabled selected>Select Train</option>
-            {% for train in trains %}
-                <option value="{{ train[0] }}">{{ train[1] }}</option>
-            {% endfor %}
-        </select><br><br>
-        </div>
-    <button type="submit">Add Schedule</button>
-</form>
-
-<hr>
-
-<h2>Schedule List</h2>
-<table>
+        <h2>Schedule List</h2>
+        <table>
     <thead>
     <tr>
         <th>Schedule Id</th>
         <th>Start Date</th>
-        <th>Start Point</th>
-        <th>Departure Time</th>
-        <th>End Point</th>
         <th>End Date</th>
-        <th>Arrival Time</th>
         <th>Status</th>
         <th>Price</th>
         <th>Seats Available</th>
         <th>Train Id</th>
-        <th>Edit</th>
+        <th>Start Point</th>
+        <th>End Point</th>
+
     </tr>
     </thead>
     <tbody>
     {% for schedule in schedules %}
         <tr>
             <td>{{ schedule[0] }}</td>
-            <td>{{ schedule[1] }}</td>
-            <td>{{ schedule[2] }}</td>
-            <td>{{ schedule[3] }}</td>
-            <td>{{ schedule[4] }}</td>
+            <td>{{ schedule[1] }}-{{ schedule[2] }}</td>
+            <td>{{ schedule[3] }}-{{ schedule[4] }}</td>
             <td>{{ schedule[5] }}</td>
             <td>{{ schedule[6] }}</td>
             <td>{{ schedule[7] }}</td>
             <td>{{ schedule[8] }}</td>
             <td>{{ schedule[9] }}</td>
             <td>{{ schedule[10] }}</td>
-            <td>
-                <button class="edit-button" onclick="openEditModal({{ schedule[0] }}, '{{ schedule[1] }}', {{ schedule[2] }},
-                        '{{ schedule[3] }}', {{ schedule[4] }}, '{{ schedule[5] }}', '{{ schedule[6] }}', '{{ schedule[7] }}', {{ schedule[8] }},
-                        {{ schedule[9] }}, {{ schedule[10] }})">Edit</button>
-            </td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+    </div>
+</div>
+
+<!-- Add Schedule Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Schedule</h2>
+        <form id="addForm" action="/add_schedules" method="POST">
+
+            <div class="form-row">
+                <label for="trainId">Train Id:</label>
+                <select id="trainId" name="train_id" required>
+                    <option value="" disabled selected>Select Train</option>
+                    {% for train in trains %}
+                        <option value="{{ train[0] }}">{{ train[1] }}</option>
+                    {% endfor %}
+                </select><br><br>
+            </div>
+
+            <div class="form-row">
+                <label for="routeId">Route Id:</label>
+                <select id="routeId" name="route_id" required>
+                    <option value="" disabled selected>Select Route</option>
+                    {% for route in routes %}
+                        <option value="{{ route[0] }}">{{ route[0] }}</option>
+                    {% endfor %}
+                </select><br><br>
+            </div>
+
+
+            <div class="form-row">
+                <label for="price">Price:</label>
+                <input type="number" step="0.01" id="price" name="price"  min="1" required><br><br>
+            </div>
+
+            <div class="form-row">
+                <label for="start_dt">Journey Start:</label>
+                <input type="datetime-local" id="start_dt" name="start_dt"><br><br><br>
+            </div>
+
+            <div class="form-row">
+                <label for="end_dt">Journey End:</label>
+                <input type="datetime-local" id="end_dt" name="end_dt"><br><br><br>
+            </div>
+
+
+            <button type="submit">Add Schedule</button>
+        </form>
     </div>
 </div>
 
@@ -434,6 +457,142 @@
     </div>
 </div>
 
+<!-- Add Delay to Schedule Modal -->
+<div id="addStationModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Delay to Schedule</h2>
+        <form id="addStationForm" action="/add_delays" method="POST">
+            <label for="scheduleId">Schedule ID:</label>
+            <select id="scheduleId" name="schedule_id" required>
+                <option value="" disabled selected>Select Schedule</option>
+                {% for schedule in schedules %}
+                    <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="duration">Duration:</label>
+            <input type="time" id="duration" name="duration" required>
+
+            <label for="reason">Reason:</label>
+            <textarea id="reason" name="reason" required></textarea>
+
+            <button type="submit">Add Delay</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Cancellation to Schedule Modal -->
+<div id="deleteStationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('deleteStationModal')">&times;</span>
+        <h2>Add Cancellations to Schedule</h2>
+        <form id="deleteStationForm" action="/add_cancellations" method="POST">
+            <label for="scheduleId">Schedule ID:</label>
+            <select id="scheduleId" name="schedule_id" required>
+                <option value="" disabled selected>Select a Schedule</option>
+                {% for schedule in schedules %}
+                    <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="cancellationDate">Cancellation Date:</label>
+            <input type="date" id="cancellationDate" name="cancellation_date" required>
+
+            <label for="reason">Reason for Cancellation:</label>
+            <textarea id="reason" name="reason" required></textarea>
+
+            <button type="submit">Add Cancellation</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // Helper Functions
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function populateModalFields(modalId, data) {
+        Object.keys(data).forEach(key => {
+            const input = document.getElementById(`${modalId}${key}`);
+            if (input) input.value = data[key];
+        });
+    }
+
+    function handleOutsideClick(event) {
+        const modals = ['addModal','addStationModal','deleteStationModal'];
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (event.target === modal) closeModal(modalId);
+        });
+    }
+
+    // Attach event listener for clicks outside modals
+    window.addEventListener('click', handleOutsideClick);
+
+    // Add Schedule Modal
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+        const trainId = document.getElementById('trainId').value;
+        const routeId = document.getElementById('routeId').value;
+        const price = document.getElementById('price').value;
+        const start_dt = document.getElementById('start_dt').value;
+        const end_dt = document.getElementById('end_dt').value;
+
+    });
+
+    // Add Delay to Schedule Modal
+    document.getElementById('addStationForm').addEventListener('submit', function (event) {
+        const scheduleId = document.getElementById('scheduleId').value;
+        const duration = document.getElementById('duration').value;
+        const reason = document.getElementById('reason').value;
+    });
+
+    // Add Cancellations Form Schedule
+    document.getElementById('deleteStationForm').addEventListener('submit', function (event) {
+        const scheduleId = document.getElementById('scheduleId').value;
+        const cancellationDate = document.getElementById('cancellationDate').value;
+        const reason = document.getElementById('reason').value;
+    });
+
+    // Edit schedule Modal
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            let startStation = button.getAttribute('data-startStationId');
+            let endStation = button.getAttribute('data-endStationId');
+
+            const data = {
+                RouteId: button.getAttribute('data-id'),
+                NumOfStops: button.getAttribute('data-numOfStops'),
+                Distance: button.getAttribute('data-distance'),
+                StartStation: startStation,
+                EndStation: endStation
+            };
+
+            populateModalFields('edit', data);
+            showModal('editModal');
+        });
+    });
+
+
+    // Close buttons for modals
+    document.querySelectorAll('.close').forEach(button => {
+        button.addEventListener('click', function () {
+            closeModal(button.closest('.modal').id);
+        });
+    });
+
+
+
+
+</script>
+
+
 <script>
     // Function to open the edit modal and populate fields
     function openEditModal(scheduleId, startDate, startPoint, departureTime, endPoint, endDate, arrivalTime, status, price, seatsAvailable) {
@@ -475,6 +634,69 @@
             alert("Start station and End station cannot be the same. Please select different stations.");
         }
     });
+</script>
+
+<script>
+    // Function to set the minimum date and time for both inputs (must be in the future)
+    function setMinDateTime() {
+        var now = new Date();
+
+        // Format the current date and time as YYYY-MM-DDTHH:MM:SS
+        var year = now.getFullYear();
+        var month = ("0" + (now.getMonth() + 1)).slice(-2);  // Ensure two-digit format for months
+        var day = ("0" + now.getDate()).slice(-2);  // Ensure two-digit format for days
+        var hours = ("0" + now.getHours()).slice(-2);  // Ensure two-digit format for hours
+        var minutes = ("0" + now.getMinutes()).slice(-2);  // Ensure two-digit format for minutes
+        var seconds = "00";  // Set seconds to "00" always
+
+        var currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+        // Set the 'min' attribute for both the start and end datetime inputs (future dates only)
+        document.getElementById("start_dt").setAttribute("min", currentDateTime);
+        document.getElementById("end_dt").setAttribute("min", currentDateTime);
+    }
+
+    // Function to ensure end date is greater than start date
+    function validateEndDate() {
+        var startDate = document.getElementById("start_dt").value;
+        var endDate = document.getElementById("end_dt").value;
+
+        // If end date is earlier than or equal to start date, set the error message
+        if (startDate && endDate && endDate <= startDate) {
+            alert("End date must be greater than the start date.");
+            document.getElementById("end_dt").setCustomValidity("End date must be greater than start date.");
+        } else {
+            // Remove the custom validity if the condition is met
+            document.getElementById("end_dt").setCustomValidity("");
+        }
+    }
+
+    // Function to remove seconds from datetime-local input (set to "00" always)
+    function removeSeconds(event) {
+        var input = event.target;
+        var value = input.value;
+        var dateTimeParts = value.split("T");
+
+        if (dateTimeParts.length > 1) {
+            var timeParts = dateTimeParts[1].split(":");
+            // Set seconds to "00"
+            timeParts[2] = "00";
+            input.value = dateTimeParts[0] + "T" + timeParts.join(":");
+        }
+    }
+
+    // Add event listeners to check for changes in both date-time inputs
+    window.onload = function() {
+        setMinDateTime();  // Set the minimum date/time on page load
+
+        // Add event listeners for both the start and end datetime inputs
+        document.getElementById("start_dt").addEventListener("change", validateEndDate);
+        document.getElementById("end_dt").addEventListener("change", validateEndDate);
+
+        // Add event listeners to ensure seconds are set to "00" when the user selects a time
+        document.getElementById("start_dt").addEventListener("blur", removeSeconds);
+        document.getElementById("end_dt").addEventListener("blur", removeSeconds);
+    };
 </script>
 
 </body>

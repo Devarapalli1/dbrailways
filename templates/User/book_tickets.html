@@ -8,6 +8,15 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         /* CSS */
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background:transparent;
+            height:40px;
+            border:1px solid #d8d8d8;
+            width:220px;
+            -webkit-appearance: none;
+        }
         .button-container {
             display: flex;
             gap: 10px;  /* Add spacing between the buttons */
@@ -244,50 +253,57 @@
 <div class="main-container">
     <div class="sidebar">
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
-        <a href="/tickets" id="booking-link">Book Tickets</a>
+        <a href="/search_booktrains" id="booking-link">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
         <a href="/payments" id="payment-link">Payments</a>
+        <a href="/ulogout" id="logout-link">Logout</a>
     </div>
     <div class="container">
         <section>
-        <h2>Adding Passengers</h2>
-        <br><br>
-        <form action="/submit_booking/{{ schedule_id }}" method="POST" id="booking-form">
-            <div class="form-row">
-                <label for="dependent_name_1">Name:</label>
-                <input type="text" id="dependent_name_1" name="dependent_name_1" required>
-            </div>
-            <div class="form-row">
-                <label for="email_1">Email:</label>
-                <input type="email" id="email_1" name="email_1" required>
-            </div>
-            <div class="form-row">
-                <label for="mobileNumber_1">Mobile Number:</label>
-                <input type="text" id="mobileNumber_1" name="mobileNumber_1" required>
-            </div>
-            <div class="form-row">
-                <label for="age_1">Age:</label>
-                <input type="number" id="age_1" name="age_1" required>
-            </div>
+            <h2>Adding Passengers</h2>
+            <br><br>
+            <!-- Combined the two forms into one, and put all fields in the same form -->
+            <form action="/submit_payment/{{ schedule_id }}" method="POST" id="booking-form">
+                <!-- Passenger details -->
+                <div class="form-row">
+                    <label for="dependent_name_1">Name:</label>
+                    <input type="text" id="dependent_name_1" name="dependent_name_1" required>
+                </div>
+                <div class="form-row">
+                    <label for="email_1">Email:</label>
+                    <input type="email" id="email_1" name="email_1" required>
+                </div>
+                <div class="form-row">
+                    <label for="mobileNumber_1">Mobile Number:</label>
+                    <input type="text" id="mobileNumber_1" name="mobileNumber_1" required>
+                </div>
+                <div class="form-row">
+                    <label for="age_1">Age:</label>
+                    <input type="number" id="age_1" name="age_1" required>
+                </div>
+                <div class="form-row">
+                    <label for="seatclass">Select Class:</label>
+                    <select id="seatclass" name="seatclass" required>
+                        <option value="" disabled selected>Select Class</option>
+                        {% for seat in seats %}
+                            <option value="{{ seat[0] }}">{{ seat[0] }}</option>
+                        {% endfor %}
+                    </select><br><br>
+                </div>
 
-            <!-- Container for dynamically added passengers -->
-            <div id="dependents-container"></div>
-            <br><br><br>
-            <hr><hr>
-            <div class="button-container">
-                <button type="button" class="add-dependent-btn" onclick="addDependent()">Add Passenger</button>
-            </div>
-            <div></div>
-            <br>
-            <br>
-        </form>
-        </section>
-        <hr>
-        <section>
-            <h2>Payment Details</h2>
-            <form action="/submit_payment/{{ booking_id }}" method="POST" id="payment-form">
+                <!-- Container for dynamically added passengers -->
+                <div id="dependents-container"></div>
+                <br><br><br>
+                <hr><hr>
+                <div class="button-container">
+                    <button type="button" class="add-dependent-btn" onclick="addDependent()">Add Passenger</button>
+                </div>
+                <br><br>
+
+                <!-- Payment details (merged into the same form) -->
+                <h2>Payment Details</h2>
                 <div class="form-row">
                     <label for="payment_type">Payment Type:</label>
                     <input type="text" id="payment_type" name="payment_type" required>
@@ -320,21 +336,10 @@
                     <label for="pay_status">Payment Status:</label>
                     <input type="text" id="pay_status" name="pay_status" required>
                 </div>
-                <div class="form-row">
-                    <label for="date">Date:</label>
-                    <input type="date" id="date" name="date" required>
-                </div>
-                <div class="form-row">
-                    <label for="time">Time:</label>
-                    <input type="time" id="time" name="time" required>
-                </div>
                 <button type="submit">Confirm booking and Proceed to Payment</button>
             </form>
         </section>
     </div>
-
-</div>
-</div>
 </div>
 
 <script>

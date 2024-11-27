@@ -241,11 +241,11 @@
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add/Edit Trains</a>
             <a href="/add_stations">Add Stations</a>
-            <a href="/add_seats">Add Seats</a>
+            <a href="/add_seats">View Seats</a>
             <a href="/add_schedules">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations" class="active">Add Cancellations</a>
-            <a href="/add_delays">Add Delays</a>
+            <a href="/add_cancellations" class="active">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
             <a href="/add_maintenance">Add Maintanance</a>
 
         </div>
@@ -258,30 +258,9 @@
         </div>
     </div>
     <div class="container">
-    <h1>Cancellation Management</h1>
-
-    <!-- Add Cancellation Form -->
-    <form action="/add_cancellation" method="POST">
-    <label for="scheduleId">Schedule ID:</label>
-    <select id="scheduleId" name="schedule_id" required>
-        <option value="" disabled selected>Select a Schedule</option>
-        {% for schedule in schedules %}
-            <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
-        {% endfor %}
-    </select>
-
-    <label for="cancellationDate">Cancellation Date:</label>
-    <input type="date" id="cancellationDate" name="cancellation_date" required>
-
-    <label for="reason">Reason for Cancellation:</label>
-    <textarea id="reason" name="reason" required></textarea>
-
-    <button type="submit">Add Cancellation</button>
-</form>
-
 <hr>
 
-<h2>Cancellation List</h2>
+<h1>Cancellation List</h1>
 
 <!-- Cancellations Table -->
 <table>

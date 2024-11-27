@@ -240,11 +240,11 @@
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add/Edit Trains</a>
             <a href="/add_stations">Add Stations</a>
-            <a href="/add_seats" class="active">Add Seats</a>
+            <a href="/add_seats" class="active">View Seats</a>
             <a href="/add_schedules">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations">Add Cancellations</a>
-            <a href="/add_delays">Add Delays</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
             <a href="/add_maintenance">Add Maintanance</a>
 
         </div>
@@ -257,33 +257,7 @@
         </div>
     </div>
     <div class="container">
-        <h1>Add Seat Details</h1>
-    <form action="/add_seats" method="POST">
-        <div class="form-row">
-    <label for="seatNumber">Seat Number:</label>
-    <input type="text" id="seatNumber" name="seat_number" required><br><br>
-        </div>
-        <div class="form-row">
-
-    <label for="class">Class:</label>
-    <input type="text" id="class" name="class1" required><br><br>
-        </div>
-        <div class="form-row">
-    <label for="price">Price:</label>
-    <input type="number" step="0.01" id="price" name="price" required><br><br>
-        </div>
-        <div class="form-row">
-        <label for="trainId">Train Id:</label>
-        <select id="trainId" name="train_id" required>
-            <option value="" disabled selected>Select Train</option>
-            {% for train in trains %}
-                <option value="{{ train[0] }}">{{ train[1] }}</option>
-            {% endfor %}
-        </select><br><br>
-        </div>
-
-    <button type="submit">Add Seat</button>
-</form>
+        <h1>View Seat Details</h1>
 
 <hr>
 
@@ -296,7 +270,7 @@
         <th>Class</th>
         <th>Price</th>
         <th>Train ID</th>
-        <th>Edit</th>
+
     </tr>
     </thead>
     <tbody>
@@ -307,8 +281,7 @@
             <td>{{ seat[2] }}</td>
             <td>{{ seat[3] }}</td>
             <td>{{ seat[4] }}</td>
-            <td><button class="editBtn" data-id="{{ seat[0] }}" data-numOfStops="{{ seat[1] }}" data-distance="{{ seat[2] }}" data-startStation="{{ seat[3] }}" data-endStation="{{ seat[4] }}">Edit</button></td>
-        </tr>
+            </tr>
     {% endfor %}
     </tbody>
 </table>
@@ -393,7 +366,36 @@
         }
     }
 </script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
 
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
 
 </body>
 </html>

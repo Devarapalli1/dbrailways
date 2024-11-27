@@ -60,21 +60,9 @@
 
 </style>
 <body>
-<div class="confirmation-container">
-    <h1>Booking Confirmation</h1>
-    {{ error }}
-    <p>Your booking has been successfully confirmed!</p>
-
-    <div class="details">
-        <h2>Train ID: {{ train_id }}</h2>
-        <h2>Total Price: {{ total_price }}</h2>
-
-        <p>Thank you for booking with us. Your train is scheduled, and we look forward to having you on board!</p>
-    </div>
-
-    <a href="{{ url_for('booking_history') }}" class="btn">Back to Bookings History</a>
-</div>
-
+<h1>Unable to book tickets</h1>
+<p> you are trying to book the tickets for persons more than seats available <p>
+    <a href="{{ url_for('search_booktrainsview') }}" class="btn">Back to Homepage</a>
 <footer>
     <p>&copy; 2024 Train Booking System</p>
 </footer>

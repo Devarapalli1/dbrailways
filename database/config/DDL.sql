@@ -143,6 +143,7 @@ CREATE TABLE seats (
 CREATE TABLE scheduleseats (
     schedule_id INT,
     seat_id INT,
+    availability_status VARCHAR(30),
     PRIMARY KEY (schedule_id,
                 seat_id),
     FOREIGN KEY (schedule_id) REFERENCES schedules(schedule_id),
@@ -250,8 +251,7 @@ CREATE TABLE payment (
     zipcode VARCHAR(10),
     cardNumber VARCHAR(16),
     pay_status VARCHAR(50),
-    date date,
-    time time,
+    pay_date DATE,
     booking_id INT,
     FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );

@@ -5,7 +5,7 @@ from dbconnection import seed_sql_filedata, execute_schema_file, create_or_use_d
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "Akhi0312"
+    "password": "Mysql@2024"
 }
 
 def get_database_name():
@@ -32,7 +32,7 @@ def create_connection(db_name=None):
     return mysql.connector.connect(**config)
 
 if __name__ == "__main__":
-    print("Welcome to Assignment 2 - Adi Vishnu Madhuri Devarapalli(11818524)")
+    print("Welcome to RMS Project - Adi Vishnu Madhuri Devarapalli(11818524)")
     db_name = get_database_name()
 
     # Establish the connection without specifying a database

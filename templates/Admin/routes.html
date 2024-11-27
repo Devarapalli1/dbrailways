@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,26 +237,26 @@
 </header>
 <div class="main-container">
     <div class="sidebar">
-    <a href="/admin_dashboard">Dashboard</a>
-    <a href="#" id="train-link">Trains</a>
-    <div class="sub-menu" id="train-submenu">
-        <a href="/add_train">Add Train</a>
-        <a href="/add_stations">Add Stations</a>
-        <a href="/add_seats">Add Seats</a>
-        <a href="/add_schedules">Add Schedules</a>
-        <a href="/add_routes" class="active">Add Routes</a>
-        <a href="/add_cancellations">Add Cancellations</a>
-        <a href="/add_delays">Add Delays</a>
-        <a href="/add_maintenance">Add Maintanance</a>
+        <a href="/admin_dashboard">Dashboard</a>
+        <a href="#" id="train-link">Trains</a>
+        <div class="sub-menu" id="train-submenu">
+            <a href="/add_train">Add Train</a>
+            <a href="/add_stations">Add Stations</a>
+            <a href="/add_seats">View Seats</a>
+            <a href="/add_schedules">Add Schedules</a>
+            <a href="/add_routes" class="active">Add Routes</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
+            <a href="/add_maintenance">Add Maintanance</a>
+        </div>
+        <a href="#" id="employee-link">Employees</a>
+        <div class="sub-menu1" id="employee-submenu">
+            <a href="/add_departments">Add Departments</a>
+            <a href="/add_employees">Add Employees</a>
+            <a href="/add_shifts">Add Shifts</a>
+            <a href="/assignemployee_shifts">Add Employee Shifts</a>
+        </div>
     </div>
-    <a href="#" id="employee-link">Employees</a>
-    <div class="sub-menu1" id="employee-submenu">
-        <a href="/add_departments">Add Departments</a>
-        <a href="/add_employees">Add Employees</a>
-        <a href="/add_shifts">Add Shifts</a>
-        <a href="/assignemployee_shifts">Add Employee Shifts</a>
-    </div>
-</div>
     <div class="container">
         <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
             <!-- Add Route Button -->
@@ -274,53 +275,55 @@
             </button>
         </div>
 
-    <hr>
+        <hr>
 
-    <h2>Route List</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Route ID</th>
-            <th>Number of Station Stops</th>
-            <th>Distance (km)</th>
-            <th>Start Station</th>
-            <th>End Station</th>
-            <th>Edit</th>
-            <th>View</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for route in routes %}
+        <h2>Route List</h2>
+        <table>
+            <thead>
             <tr>
-                <td>{{ route[0] }}</td>
-                <td>{{ route[1] }}</td>
-                <td>{{ route[2] }}</td>
-                <td>{{ route[3] }}</td>
-                <td>{{ route[4] }}</td>
-                <td>
-                    <button class="editBtn"
-                            data-id="{{ route[0] }}"
-                            data-numOfStops="{{ route[1] }}"
-                            data-distance="{{ route[2] }}"
-                            data-startStation="{{ route[3] }}"
-                            data-endStation="{{ route[4] }}">Edit</button>
-                </td>
-                <td>
-                    <button class="viewBtn" data-id="{{ route[0] }}">View</button>
-                </td>
-
-
+                <th>Route ID</th>
+                <th>Number of Station Stops</th>
+                <th>Distance (km)</th>
+                <th>Start Station</th>
+                <th>End Station</th>
+                <th>Edit</th>
+                <th>View</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+            {% for route in routes %}
+                <tr>
+                    <td>{{ route[0] }}</td>
+                    <td>{{ route[1] }}</td>
+                    <td>{{ route[2] }}</td>
+                    <td>{{ route[3] }}</td>
+                    <td>{{ route[4] }}</td>
+                    <td>
+                        <button class="editBtn"
+                                data-id="{{ route[0] }}"
+                                data-numOfStops="{{ route[1] }}"
+                                data-distance="{{ route[2] }}"
+                                data-startStation="{{ route[3] }}"
+                                data-startStationId="{{ route[5] }}"
+                                data-endStationId="{{ route[6] }}"
+                                data-endStation="{{ route[4] }}">Edit</button>
+                    </td>
+                    <td>
+                        <button class="viewBtn" data-id="{{ route[0] }}">View</button>
+                    </td>
+
+
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Add Route Modal -->
 <div id="addModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeAddModal()">&times;</span>
+        <span class="close">&times;</span>
         <h2>Add Route</h2>
         <form id="addForm" action="/add_routes" method="POST">
             <div class="form-row">
@@ -353,7 +356,7 @@
 <!-- Add Station to Route Modal -->
 <div id="addStationModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeAddStationModal()">&times;</span>
+        <span class="close">&times;</span>
         <h2>Add Station to Route</h2>
         <form id="addStationForm" action="/add_station_to_route" method="POST">
             <div class="form-row">
@@ -401,7 +404,6 @@
 <!-- Edit Route Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeEditModal()">&times;</span>
         <span class="close" onclick="closeEditModal()">&times;</span>
         <h2>Edit Route</h2>
         <form id="editForm" action="/edit_route" method="POST">
@@ -491,13 +493,17 @@
     // Edit Route Modal
     document.querySelectorAll('.editBtn').forEach(button => {
         button.addEventListener('click', function () {
+            let startStation = button.getAttribute('data-startStationId');
+            let endStation = button.getAttribute('data-endStationId');
+
             const data = {
                 RouteId: button.getAttribute('data-id'),
                 NumOfStops: button.getAttribute('data-numOfStops'),
                 Distance: button.getAttribute('data-distance'),
-                StartStation: button.getAttribute('data-startStation'),
-                EndStation: button.getAttribute('data-endStation')
+                StartStation: startStation,
+                EndStation: endStation
             };
+
             populateModalFields('edit', data);
             showModal('editModal');
         });

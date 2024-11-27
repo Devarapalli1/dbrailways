@@ -198,6 +198,7 @@
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
         <a href="/payments" id="payment-link">Payments</a>
+        <a href="/ulogout" id="logout-link">Logout</a>
     </div>
 <div class="container">
     <h1>Search and Book Train Tickets</h1>
@@ -261,8 +262,8 @@
             <td>{{ detail[1]}}</td>
             <td>{{ detail[8] }}</td>
             <td>{{ detail[10] }}</td>
-            <td>{{ detail[9] }}</td>
-            <td>{{ detail[13] }}</td>
+            <td>{{ detail[7] }}-{{ detail[9] }}</td>
+            <td>{{ detail[12]}}-{{ detail[13] }}</td>
             <td>{{ detail[15] }}</td>
             <td>{{ detail[16] }}</td>
             <td>
@@ -278,5 +279,12 @@
 
 </div>
 </div>
+<script>
+    // Get today's date in the format yyyy-mm-dd
+    const today = new Date().toISOString().split('T')[0];
+
+    // Set the min attribute of the input to today's date
+    document.getElementById('journey-date').setAttribute('min', today);
+</script>
 </body>
 </html>

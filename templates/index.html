@@ -7,17 +7,51 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             text-align: center;
-            padding: 50px;
+            background: url('{{ url_for("static", filename="images/background.jpg") }}') no-repeat center center fixed;
+            background-size: cover;
+            background-position: center;
+            background-color: #f4f4f9;
+            color: white;
         }
+        header img {
+            width: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 5px solid white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.5rem;
+            color: #000000;
+            margin-bottom: 30px;
+        }
+
+        section {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 100px;
+        }
+
         button {
             padding: 15px 25px;
             font-size: 16px;
-            margin: 20px;
             cursor: pointer;
             border-radius: 5px;
             border: none;
+            width: 200px;
+            transition: background-color 0.3s ease;
         }
+
         #adminButton {
             background-color: #4CAF50;
             color: white;
@@ -27,20 +61,34 @@
             color: white;
         }
         button:hover {
-            opacity: 0.8;
+            opacity: 0.9;
+            transform: scale(1.05);
         }
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1rem;
+        }
+
     </style>
 </head>
 <body>
 
-<h1>Welcome to the Website</h1>
-<p>Select an option:</p>
+<header>
+    <!-- Image Section -->
+    <img src="{{ url_for('static', filename='images/index.jpg') }}" alt="Website Logo">
+    <h1>Welcome to Our Website</h1>
+    <p>Choose your role to proceed:</p>
+</header>
 
-<!-- Button for Admin Login -->
-<button id="adminButton" onclick="window.location.href='/admin_login'">Admin Login</button>
-
-<!-- Button for User Booking -->
-<button id="userButton" onclick="window.location.href='/user_login'">User Booking</button>
+<!-- Buttons Section -->
+<section>
+    <button id="adminButton" onclick="window.location.href='/admin_login'">Admin Login</button>
+    <button id="userButton" onclick="window.location.href='/user_login'">User Booking</button>
+</section>
 
 </body>
 </html>

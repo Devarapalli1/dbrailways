@@ -241,11 +241,11 @@
         <div class="sub-menu" id="train-submenu">
             <a href="/add_train">Add/Edit Trains</a>
             <a href="/add_stations">Add Stations</a>
-            <a href="/add_seats">Add Seats</a>
+            <a href="/add_seats">View Seats</a>
             <a href="/add_schedules">Add Schedules</a>
             <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations">Add Cancellations</a>
-            <a href="/add_delays" class="active">Add Delays</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays" class="active">View Delays</a>
             <a href="/add_maintenance">Add Maintanance</a>
 
         </div>
@@ -258,26 +258,9 @@
         </div>
     </div>
     <div class="container">
-    <h1>Add Delay</h1>
-    <form action="/add_delay" method="POST">
-    <label for="scheduleId">Schedule ID:</label>
-    <select id="scheduleId" name="schedule_id" required>
-        <option value="" disabled selected>Select Schedule</option>
-        {% for schedule in schedules %}
-            <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
-        {% endfor %}
-    </select>
 
-    <label for="duration">Duration:</label>
-    <input type="time" id="duration" name="duration" required>
-
-    <label for="reason">Reason:</label>
-    <textarea id="reason" name="reason" required></textarea>
-
-    <button type="submit">Add Delay</button>
-</form>
         <hr>
-    <h2>Delay List</h2>
+    <h1>Delay List</h1>
     <table>
     <thead>
     <tr>
