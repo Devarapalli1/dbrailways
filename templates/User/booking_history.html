@@ -7,6 +7,10 @@
     <title>Booking List</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -108,14 +112,14 @@
         }
         table td button {
             padding: 8px 12px;
-            background-color: #DEB887;
+            background-color: #87CEEB;
             color: #000;
             border: 1px solid #ddd;
             cursor: pointer;
             border-radius: 5px;
         }
         table td button:hover {
-            background-color: #c7a56d;
+            background-color: #87CEEB;
         }
         .modal {
             display: none;
@@ -175,6 +179,10 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
     </style>
 </head>
 
@@ -186,7 +194,7 @@
     <div class="sidebar">
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
         <a href="/search_booktrains" id="booking-link">Book Tickets</a>
-        <a href="/booking_history" id="booking-link">Booking History</a>
+        <a href="/booking_history" id="booking-link" class="active">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
         <a href="/payments" id="payment-link">Payments</a>
@@ -203,9 +211,10 @@
             <thead>
             <tr>
                 <th>Booking ID</th>
-                <th>User ID</th>
-                <th>Date</th>
+                <th>Booking Date</th>
                 <th>Status</th>
+                <th>Train Name</th>
+                <th>Journey date and Time</th>
                 <th>Details</th>
             </tr>
             </thead>
@@ -214,9 +223,12 @@
                 <tr>
                     <td>{{ booking[0] }}</td>
                     <td>{{ booking[1] }}</td>
-                    <td>{{ booking[2] }}</td>
                     <td>{{ booking[3] }}</td>
-                    <td><a href="/booking_history/{{ booking[0] }}" class="btn-view">View Details</a></td>
+                    <td>{{ booking[4] }}</td>
+                    <td>{{ booking[5] }}-{{ booking[6] }}</td>
+                    <td>
+                        <button onclick="openTicketModal({{ booking[0] }})">View Details</button>
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -226,6 +238,82 @@
     {% endif %}
 </div>
 </div>
-</body>
 
+<!-- Modal for Ticket Details -->
+<div id="ticketModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeTicketModal()">&times;</span>
+        <h3>Ticket Details</h3>
+        <div id="ticketDetails">
+            <!-- Ticket details will be dynamically loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Open the ticket details modal and load ticket data
+    function openTicketModal(booking_id) {
+        fetch(`/booking_details/${booking_id}`)
+            .then(response => response.json())
+            .then(data => {
+                const modal = document.getElementById('ticketModal');
+                const ticketDetails = document.getElementById('ticketDetails');
+
+                // Clear previous content
+                ticketDetails.innerHTML = '';
+
+                // Populate the modal with ticket details
+                if (data.tickets && data.tickets.length > 0) {
+                    const table = document.createElement('table');
+                    table.classList.add('ticket-table');
+
+                    const tableHeader = document.createElement('thead');
+                    tableHeader.innerHTML = `
+                            <tr>
+                                <th>Ticket Number</th>
+                                <th>Seat Number</th>
+                                <th>Dependent Name</th>
+                            </tr>
+                        `;
+                    table.appendChild(tableHeader);
+
+                    const tableBody = document.createElement('tbody');
+                    data.tickets.forEach(ticket => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                                <td>${ticket[0]}</td>
+                                <td>${ticket[1]}</td>
+                                <td>${ticket[2]}</td>
+                            `;
+                        tableBody.appendChild(row);
+                    });
+
+                    table.appendChild(tableBody);
+                    ticketDetails.appendChild(table);
+                } else {
+                    ticketDetails.innerHTML = '<p>No tickets found.</p>';
+                }
+
+                modal.style.display = "block";
+            })
+            .catch(error => {
+                console.error('Error loading ticket details:', error);
+            });
+    }
+
+    // Close the ticket details modal
+    function closeTicketModal() {
+        document.getElementById("ticketModal").style.display = "none";
+    }
+
+    // Close the modal if the user clicks anywhere outside of the modal
+    window.onclick = function(event) {
+        var modal = document.getElementById("ticketModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
 </html>

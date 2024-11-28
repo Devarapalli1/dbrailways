@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feedback Details</title>
     <style>
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -76,7 +80,7 @@
             cursor: pointer;
         }
         form button:hover {
-            background-color: #DEB887;
+            background-color: #87CEEB;
         }
         table {
             width: 100%;
@@ -106,14 +110,14 @@
         }
         table td button {
             padding: 8px 12px;
-            background-color: #DEB887;
+            background-color: #87CEEB;
             color: #000;
             border: 1px solid #ddd;
             cursor: pointer;
             border-radius: 5px;
         }
         table td button:hover {
-            background-color: #c7a56d;
+            background-color: #87CEEB;
         }
         .modal {
             display: none;
@@ -184,7 +188,7 @@
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
         <a href="/search_booktrains" id="booking-link">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
-        <a href="/user_feedback" id="feedback-link">Feedback</a>
+        <a href="/user_feedback" id="feedback-link" class="active">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
         <a href="/payments" id="payment-link">Payments</a>
         <a href="/ulogout" id="logout-link">Logout</a>

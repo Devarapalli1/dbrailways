@@ -3,6 +3,7 @@ from flask import flash, Flask, render_template, request, redirect, url_for, ses
 from flask_mysqldb import MySQL
 from datetime import datetime
 import random
+import decimal
 
 
 app = Flask(__name__)
@@ -78,6 +79,7 @@ def add_departments():
             cur.execute("SELECT department_id FROM department WHERE dept_name = %s", (dept_name,))
             existing_deptname = cur.fetchone()
             if existing_deptname:
+                cur.execute("SELECT * FROM department")
                 departments = cur.fetchall()
                 return render_template('Admin/add_department.html',departments=departments,error="Department name already exists. Please choose another name.")
 
@@ -85,6 +87,7 @@ def add_departments():
             cur.execute("SELECT department_id FROM department WHERE department_id = %s", (department_id,))
             existing_dept_id = cur.fetchone()
             if existing_dept_id:
+                cur.execute("SELECT * FROM department")
                 departments = cur.fetchall()
                 return render_template('Admin/add_department.html',departments=departments,error="Department ID already exists. Please choose another ID.")
 
@@ -188,11 +191,9 @@ def add_employees():
             emp_status = request.form['emp_status']
             salary = request.form['salary']
             department_id = request.form['department_id']
-
             cur = mysql.connection.cursor()
             try:
-                # Inserting data into the database
-                cur.execute("INSERT INTO employee(department_id,salary,emp_status,emp_password,zipcode,country,employee_name,mail,mobileNumber,role,address,city,state) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)",
+                cur.execute("INSERT INTO employee(department_id,salary,emp_status,emp_password,zipcode,country,employee_name,mail,mobileNumber,role,address,city,state) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                             (department_id,salary,emp_status,emp_password,zipcode,country,employee_name,mail,mobileNumber,role,address,city,state))
                 mysql.connection.commit()
                 return redirect(url_for('view_employees'))  # Redirect after success
@@ -212,7 +213,6 @@ def edit_employees():
     admin_id=session.get('admin_id')
     if admin_id:
         if request.method == 'POST':
-            print(request.form)
             employee_id=request.form['editEmployeeId']
             editEmployeeName = request.form['editEmployeeName']
             mail = request.form['editEmail']
@@ -252,6 +252,8 @@ def delete_employee():
         cur = mysql.connection.cursor()
         try:
             cur.execute("UPDATE employee SET emp_status='Inactive' WHERE employee_id = %s", (employee_id,))
+            mysql.connection.commit()
+            cur.execute("DELETE from employee_shifts where employee_id = %s", (employee_id,))
             mysql.connection.commit()
             return redirect(url_for('view_employees'))  # Redirect after success
         except Exception as e:
@@ -1095,12 +1097,24 @@ def add_cancellations():
             cancellation_date = request.form['cancellation_date']
             reason = request.form['reason']
             cur = mysql.connection.cursor()
+            now = datetime.now()
+            notification_date_time = now.strftime("%Y-%m-%d %H:%M:%S")
             try:
                 # Inserting data into the database
                 cur.execute("INSERT INTO cancellations(schedule_id, cancellation_date, reason) VALUES(%s, %s, %s)",
                             (schedule_id, cancellation_date, reason))
 
                 cur.execute("UPDATE schedules SET status = 'Canceled' WHERE schedule_id = %s;", (schedule_id,))
+                cur.execute("INSERT INTO notifications(noti_description, noti_date, noti_time, admin_id) VALUES(%s, %s, %s, %s)",
+                            ("Cancelled Scheduled train", notification_date_time[0:10], notification_date_time[11:], admin_id))
+                notification_id = cur.lastrowid
+                cur.execute("SELECT user_id FROM ticket WHERE schedule_id = %s;", (schedule_id,))
+                user_ids = cur.fetchall()
+
+                insert_query = "INSERT INTO user_notifications(user_id, notification_id) VALUES(%s, %s)"
+                for user_row in user_ids:
+                    cur.execute(insert_query, (user_row[0], notification_id))
+
                 mysql.connection.commit()
                 return redirect(url_for('view_trainschedule'))  # Redirect after success
             except Exception as e:
@@ -1147,6 +1161,56 @@ def add_delays():
         return render_template('Admin/train_schedule.html')
     else:
         return redirect(url_for('admin_login'))
+
+@app.route('/add_notifications')
+def view_notificatons():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM notifications")
+    notifications = cur.fetchall()
+    cur.execute("SELECT * FROM user")
+    users = cur.fetchall()
+    cur.close()
+    return render_template('Admin/add_notifications.html',users=users,notifications=notifications)
+
+@app.route('/add_notifications', methods=['POST'])
+def add_notifications():
+    admin_id=session.get('admin_id')
+    if admin_id:
+        if request.method == 'POST':
+            noti_description = request.form['noti_description']
+            now = datetime.now()
+            noti_date = now.strftime('%Y-%m-%d')
+            noti_time = now.strftime('%H:%M:%S')
+            user_id=request.form['user_id']
+            cur = mysql.connection.cursor()
+            try:
+                # Inserting data into the database
+                cur.execute("INSERT INTO notifications(noti_description, noti_date, noti_time,admin_id) VALUES(%s, %s, %s,%s)",
+                            (noti_description, noti_date, noti_time,admin_id))
+                mysql.connection.commit()
+                notification_id = cur.lastrowid
+                cur.execute("INSERT INTO user_notifications(notification_id, user_id) VALUES(%s,%s)",
+                            (notification_id, user_id))
+                mysql.connection.commit()
+                return redirect(url_for('view_notificatons'))  # Redirect after success
+            except Exception as e:
+                mysql.connection.rollback()  # Rollback in case of an error
+                return f"Error: {str(e)}"
+            finally:
+                cur.close()
+        return redirect(url_for('view_notificatons'))
+    else:
+        return redirect(url_for('admin_login'))
+
+@app.route('/user_reviews')
+def user_reviews():
+    cur = mysql.connection.cursor()
+    query = """SELECT f.feedback_id, f.feed_description, f.feed_date, f.feed_time, u.user_id, u.name AS user_name
+            FROM feedback f JOIN user u ON f.user_id = u.user_id """
+    cur.execute(query)
+    feedbacks = cur.fetchall()
+    cur.close()
+    return render_template('Admin/user_reviews.html',feedbacks=feedbacks)
 
 
 @app.route('/user_login')
@@ -1235,34 +1299,56 @@ def search_booktrainsview():
 @app.route('/search_booktrains', methods=['POST'])
 def search_booktrains():
     if request.method == 'POST':
-        train_id = request.form['train_id']
         journey_start_date = request.form['journey_start_date']
         source = request.form['source']
         destination = request.form['destination']
         cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM stations")
+        stations = cur.fetchall()
         try:
-            # Check if the email already exists
             cur.execute("""
-               SELECT t.train_id, t.train_name, t.train_type, t.train_capacity, t.numOfCoaches, t.admin_id,
-               s.schedule_id, s.start_date, 
-               sp.name AS start_station_name,  -- Start station name
-               s.departure_time, 
-               ep.name AS end_station_name,    -- End station name
-               s.end_point, s.end_date, 
-               s.arrival_time, s.status, 
-               s.price, s.seats_available
-            FROM train t
-            JOIN schedules s ON t.train_id = s.train_id
-            LEFT JOIN stations sp ON s.start_point = sp.station_id  -- Join for start station
-            LEFT JOIN stations ep ON s.end_point = ep.station_id    -- Join for end station
-            WHERE s.start_point = %s AND s.end_point = %s AND s.start_date = %s""", (source, destination, journey_start_date))
+               SELECT t.train_id, 
+       t.train_name, 
+       t.train_type, 
+       t.train_capacity, 
+       t.numOfCoaches, 
+       t.admin_id,
+       s.schedule_id, 
+       s.start_date, 
+       sp.name AS start_station_name,  -- Start station name
+       s.departure_time, 
+       ep.name AS end_station_name,    -- End station name
+       s.end_point, 
+       s.end_date, 
+       s.arrival_time, 
+       s.status, 
+       s.price, 
+       s.seats_available,
+       COUNT(CASE WHEN st.class = 'SL' AND ss.availability_status = 'Available' THEN 1 END) AS economy_seat_count,
+       COUNT(CASE WHEN st.class = 'CC' AND ss.availability_status = 'Available' THEN 1 END) AS business_seat_count,
+       COUNT(CASE WHEN st.class = '2S' AND ss.availability_status = 'Available' THEN 1 END) AS first_class_seat_count
+FROM train t
+JOIN schedules s ON t.train_id = s.train_id
+LEFT JOIN stations sp ON s.start_point = sp.station_id  -- Join for start station
+LEFT JOIN stations ep ON s.end_point = ep.station_id    -- Join for end station
+LEFT JOIN seats st ON t.train_id = st.train_id          -- Join for seats
+LEFT JOIN scheduleseats ss ON s.schedule_id = ss.schedule_id AND st.seat_id = ss.seat_id  -- Join for schedule seats
+WHERE s.start_point = %s
+  AND s.end_point = %s
+  AND s.start_date = %s  -- Use quotes for date
+GROUP BY t.train_id, t.train_name, t.train_type, t.train_capacity, t.numOfCoaches, t.admin_id,
+         s.schedule_id, s.start_date, sp.name, s.departure_time, ep.name, s.end_point, 
+         s.end_date, s.arrival_time, s.status, s.price, s.seats_available;
+""", (source, destination, journey_start_date))
 
             details = cur.fetchall()
 
             if details:
-                return render_template('User/search_booking.html',details=details)
+                return render_template('User/search_booking.html',stations=stations,details=details)
+                #return redirect(url_for('search_booktrainsview', details=details))
             else:
-                return render_template('User/search_booking.html',error ="No schedule for trains in this date")
+                return render_template('User/search_booking.html',stations=stations,error ="No schedule for trains in this date")
+                #return redirect(url_for('search_booktrainsview', error ="No schedule for trains in this date"))
 
         except Exception as e:
             mysql.connection.rollback()  # Rollback in case of an error
@@ -1317,7 +1403,8 @@ def submit_payment(schedule_id):
 
         if journey_price:
             train_id = journey_price[0]
-            journey_price = journey_price[1]
+            jour_price = journey_price[1]
+            journey_seats=journey_price[2]
         else:
             flash('No schedule found with the given schedule_id.', 'danger')
             return redirect(url_for('payment', schedule_id=schedule_id))
@@ -1331,7 +1418,7 @@ def submit_payment(schedule_id):
             flash('No seats found for the given train and class.', 'danger')
             return redirect(url_for('payment', schedule_id=schedule_id))
 
-        total_price = len(dependents_data) * (journey_price + seat_price)
+        total_price = len(dependents_data) * (jour_price + seat_price)
         print(f"Total Price for booking: ${total_price:.2f}")
 
         cur.execute("""SELECT COUNT(*) FROM scheduleseats ss JOIN seats s ON ss.seat_id = s.seat_id WHERE ss.schedule_id = %s AND ss.availability_status = 'Available' AND s.class = %s""",
@@ -1376,15 +1463,16 @@ def submit_payment(schedule_id):
                         cur.execute("""UPDATE scheduleseats SET availability_status = 'Booked' WHERE schedule_id = %s AND seat_id = %s""",
                             (schedule_id, seat_id))
                         mysql.connection.commit()
-
-                availseats=journey_price[2]-len(dependents_data)
+                availableseats=journey_price[2]
+                availseats=availableseats-len(dependents_data)
+                print(availseats,type(journey_price[2]))
                 cur.execute("""UPDATE schedules SET seats_available =%s  WHERE schedule_id = %s """,(availseats,schedule_id))
                 mysql.connection.commit()
 
                 # Insert payment details into the database
-                cur.execute("""INSERT INTO payment (pay_date, payment_type, address, city, state, country, zipcode, cardNumber, pay_status, booking_id) 
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                            (pay_date, payment_type, address, city, state, country, zipcode, cardNumber, 'Confirmed', booking_id))
+                cur.execute("""INSERT INTO payment (total_price,pay_date, payment_type, address, city, state, country, zipcode, cardNumber, pay_status, booking_id) 
+                            VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                            (total_price,pay_date, payment_type, address, city, state, country, zipcode, cardNumber, 'Confirmed', booking_id))
                 mysql.connection.commit()
 
                 flash('Payment processed and booking successful!', 'success')
@@ -1409,11 +1497,48 @@ def submit_payment(schedule_id):
 def booking_history():
     user_id =session['user_id']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM booking where user_id =%s",(user_id,))
+    cur.execute("""SELECT b.booking_id, b.date AS booking_date, b.status AS booking_status,t.train_id AS train_number,t.train_name,
+                s.start_date AS journey_date,s.departure_time AS journey_time FROM booking b
+                JOIN ticket tk ON b.booking_id = tk.booking_id
+                JOIN schedules s ON tk.schedule_id = s.schedule_id
+                JOIN train t ON s.train_id = t.train_id
+                WHERE b.user_id = %s;""", (user_id,))
     bookings = cur.fetchall()
     print(bookings)
     cur.close()
     return  render_template('User/booking_history.html',bookings=bookings)
+
+@app.route('/booking_details/<int:booking_id>', methods=['GET'])
+def booking_details(booking_id):
+    cur = mysql.connection.cursor()
+
+    # Fetch the booking details
+    cur.execute("SELECT * FROM booking WHERE booking_id = %s", (booking_id,))
+    booking = cur.fetchone()
+
+    if not booking:
+        return jsonify({"error": "Booking not found"}), 404  # Return JSON error message
+
+    # Fetch the ticket details
+    cur.execute("""SELECT t.ticket_number, s.seat_number, d.dependent_name 
+                    FROM ticket t JOIN seats s ON t.seat_id = s.seat_id
+                    JOIN dependents d ON t.dependent_id = d.dependent_id
+                    WHERE t.booking_id = %s;""", (booking_id,))
+    tickets = cur.fetchall()
+    print(len(tickets))
+
+    # If no tickets found, return a message
+    if not tickets:
+        return jsonify({"tickets": [], "message": "No tickets found for this booking"}), 200
+
+    # Return the booking details and tickets in JSON format
+    return jsonify({
+        "booking_id": booking[0],
+        "date": booking[2],
+        "status": booking[3],
+        "tickets": tickets
+    })
+
 
 @app.route('/notifications')
 def user_notifications():
@@ -1441,7 +1566,7 @@ def add_feedback():
     if request.method=='POST':
         user_id =session['user_id']
         feed_description=request.form['feed_description']
-        now = datetime.datetime.now()
+        now = datetime.now()
         formatted_date_time = now.strftime("%Y-%m-%d %H:%M:%S")
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO feedback(feed_description, feed_date,feed_time, user_id) VALUES(%s,%s, %s, %s)",
@@ -1472,7 +1597,8 @@ def payments():
         t.ticket_id,
         t.ticket_number,
         s1.name AS start_point,    
-        s2.name AS end_point,      
+        s2.name AS end_point,
+        p.total_price,   
         s1.address AS start_address,
         s2.address AS end_address
     FROM 

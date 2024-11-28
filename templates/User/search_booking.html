@@ -184,6 +184,10 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
     </style>
 </head>
 <header>
@@ -193,7 +197,7 @@
 <div class="main-container">
     <div class="sidebar">
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
-        <a href="/search_booktrains" id="booking-link">Book Tickets</a>
+        <a href="/search_booktrains" id="booking-link" class="active">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
@@ -203,13 +207,7 @@
 <div class="container">
     <h1>Search and Book Train Tickets</h1>
     <h1>{{ error }}</h1>
-    <!-- Search Form -->
     <form action="/search_booktrains" method="POST">
-        <div class="form-row">
-            <label for="train-id">Train ID (Optional)</label>
-            <input type="text" id="train-id" name="train_id" placeholder="Enter Train ID">
-        </div>
-
         <div class="form-row">
             <label for="journey-date">Journey Start Date</label>
             <input type="date" id="journey-date" name="journey_start_date" required>
@@ -252,6 +250,9 @@
         <th>End Time</th>
         <th>Price</th>
         <th>Seats Available</th>
+        <th>Sleeper AC(SL)</th>
+        <th>Chair AC(CC)</th>
+        <th>Non-AC Sleeper(2S)</th>
         <th>Book</th>
     </tr>
     </thead>
@@ -266,6 +267,10 @@
             <td>{{ detail[12]}}-{{ detail[13] }}</td>
             <td>{{ detail[15] }}</td>
             <td>{{ detail[16] }}</td>
+            <td>{{ detail[17] }}</td>
+            <td>{{ detail[18] }}</td>
+            <td>{{ detail[19] }}</td>
+
             <td>
                 <form action="/book_ticket/{{ detail[6] }}" method="GET">
                 <button type="submit">Book</button>

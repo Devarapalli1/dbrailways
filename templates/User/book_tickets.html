@@ -243,6 +243,10 @@
         #dependents-container {
             margin-top: 20px;
         }
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
     </style>
 </head>
 
@@ -253,7 +257,7 @@
 <div class="main-container">
     <div class="sidebar">
         <a href="/user_dashboard" id="booking-link">Dashboard </a>
-        <a href="/search_booktrains" id="booking-link">Book Tickets</a>
+        <a href="/search_booktrains" id="booking-link" class="active">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
@@ -332,10 +336,7 @@
                     <label for="cardNumber">Card Number:</label>
                     <input type="text" id="cardNumber" name="cardNumber" required>
                 </div>
-                <div class="form-row">
-                    <label for="pay_status">Payment Status:</label>
-                    <input type="text" id="pay_status" name="pay_status" required>
-                </div>
+
                 <button type="submit">Confirm booking and Proceed to Payment</button>
             </form>
         </section>

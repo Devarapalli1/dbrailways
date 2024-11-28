@@ -7,6 +7,32 @@
     <title>User Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .menu-item {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 150px;
+            text-align: center;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+        }
+        .menu-item .icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .menu-item.stations { color: #3498db; }
+        .menu-item.schedule { color: #9b59b6; }
+        .menu-item.delays { color: #e67e22; }
+        .menu-item.cancellations { color: #e74c3c; }
+        .menu-item.reservations { color: #2ecc71; }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -175,6 +201,10 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
     </style>
 </head>
 <header>
@@ -182,7 +212,7 @@
 </header>
 <div class="main-container">
     <div class="sidebar">
-        <a href="/user_dashboard" id="booking-link">Dashboard </a>
+        <a href="/user_dashboard" id="booking-link" class="active">Dashboard </a>
         <a href="/search_booktrains" id="booking-link">Book Tickets</a>
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
@@ -191,71 +221,33 @@
         <a href="/ulogout" id="logout-link">Logout</a>
     </div>
     <div class="container">
-        <h2>Search and Book Train Tickets</h2>
-        <form id="search-form">
-            <div class="form-row">
-                <label for="train-id">Train ID (Optional)</label>
-                <input type="text" id="train-id" name="train_id" placeholder="Enter Train ID">
+        <div class="content">
+            <!-- Menu -->
+            <div class="menu">
+                <div class="menu-item stations">
+                    <div class="icon">🚉</div>
+                    <a href="/search_booktrains">Book Tickets</a>
+                </div>
+                <div class="menu-item schedule">
+                    <div class="icon">⏰</div>
+                    <a href="/booking_history">Booking History</a>
+                </div>
+                <div class="menu-item delays">
+                    <div class="icon">⚠️</div>
+                    <a href="/user_feedback">Feedback</a>
+                </div>
+                <div class="menu-item cancellations">
+                    <div class="icon">❌</div>
+                    <a href="/notifications">Notifications</a>
+                </div>
+                <div class="menu-item reservations">
+                    <div class="icon">🎫</div>
+                    <a href="/payments">Payment History</a>
+
+                </div>
             </div>
-
-            <div class="form-row">
-                <label for="journey-date">Journey Start Date</label>
-                <input type="date" id="journey-date" name="journey_start_date" required>
-            </div>
-
-            <div class="form-row">
-                <label for="source">Source Station</label>
-                <select id="source" name="source">
-                    <option value="">Select Source Station</option>
-                    {% for station in stations %}
-                        <option value="{{ station[0] }}">{{ station[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="destination">Destination Station</label>
-                <select id="destination" name="destination">
-                    <option value="">Select Destination Station</option>
-                    {% for station in stations %}
-                        <option value="{{ station[0] }}">{{ station[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <button type="submit" class="search-btn">Search Trains</button>
-        </form>
-
-        <hr>
-
-        <h2>Available Trains in given routes</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Train ID</th>
-                <th>Train Name</th>
-                <th>Start Point</th>
-                <th>End Point</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Book</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for detail in details %}
-                <tr>
-                    <td>{{ detail[0] }}</td>
-                    <td>{{ detail[1] }}</td>
-                    <td>{{ detail[2] }}</td>
-                    <td>{{ detail[3] }}</td>
-                    <td>{{ detail[4] }}</td>
-                    <td>
-                        <button class="edit-button" onclick="openEditModal({{ detail[0] }}, '{{ detail[1] }}', '{{ detail[2] }}', '{{ detail[3] }}', '{{ detail[4] }}', '{{ detail[5] }}')">Book</button>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        </div>
+    </div>
     </div>
 </div>
 

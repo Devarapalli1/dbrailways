@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shift Management</title>
+    <title>Seat Management</title>
     <style>
         .sidebar a.active {
             background-color: #DEB887 !important; /* Same color as hover */
@@ -264,7 +264,6 @@
     </style>
 </head>
 <body>
-
 <header>
     <h1>Railway Management</h1>
     <a href="/alogout" class="logout-btn">Logout</a>
@@ -275,7 +274,7 @@
         <a href="/admin_dashboard">Dashboard</a>
         <a href="#" id="train-link">Trains</a>
         <div class="sub-menu" id="train-submenu">
-            <a href="/add_train">Add Train</a>
+            <a href="/add_train">Add/Edit Trains</a>
             <a href="/add_stations">Add Stations</a>
             <a href="/add_seats">View Seats</a>
             <a href="/add_schedules">Add Schedules</a>
@@ -283,123 +282,84 @@
             <a href="/add_cancellations">View Cancellations</a>
             <a href="/add_delays">View Delays</a>
             <a href="/add_maintenance">Add Maintanance</a>
+
         </div>
         <a href="#" id="employee-link">Employees</a>
         <div class="sub-menu1" id="employee-submenu">
             <a href="/add_departments">Add Departments</a>
             <a href="/add_employees">Add Employees</a>
-            <a href="/add_shifts" class="active">Add Shifts</a>
+            <a href="/add_shifts">Add Shifts</a>
             <a href="/assignemployee_shifts">Add Employee Shifts</a>
         </div>
         <div class="sub-menu2" id="notif-submenu">
             <a href="/add_notifications" >Add Notifications</a>
-            <a href="/user_reviews" >View User Reviews</a>
+        </div>
+        <div class="sub-menu3" id="reviews-submenu">
+            <a href="/user_reviews" class="active" >View User Reviews</a>
         </div>
     </div>
     <div class="container">
-    <h2>Add Shift Details</h2>
-    <form action="/add_shifts" method="POST">
-        <div class="form-row">
-            <label for="start_time">Start Time:</label>
-            <input type="time" id="start_time" name="start_time" required>
-        </div>
-        <div class="form-row">
-            <label for="end_time">End Time:</label>
-            <input type="time" id="end_time" name="end_time" required>
-        </div>
-        <div class="form-row">
-            <label for="shift_name">Shift Name:</label>
-            <input type="text" id="shift_name" name="shift_name" required>
-        </div>
-        <button type="submit">Submit</button>
-    </form>
+        <h1>View User Reviews</h1>
 
-    <hr>
-
-    <h2>Shift List</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Shift ID</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Shift Name</th>
-            <th>Edit</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for shift in shifts %}
+        <hr>
+        {% if feedbacks|length > 0 %}
+        <table>
+            <thead>
             <tr>
-                <td>{{ shift[0] }}</td>
-                <td>{{ shift[1] }}</td>
-                <td>{{ shift[2] }}</td>
-                <td>{{ shift[3] }}</td>
-                <td><button class="editBtn" data-id="{{ shift[0] }}" data-start-time="{{ shift[1] }}" data-end-time="{{ shift[2] }}" data-name="{{ shift[3] }}">Edit</button></td>
+                <th>ID</th>
+                <th>Date & Time</th>
+                <th>Description</th>
+                <th>User ID</th>
+                <th>User Name</th>
+
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-</div>
-
-<!-- Edit Modal -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Shift</h2>
-        <form id="editForm" action="/edit_shift" method="POST">
-            <div class="form-row">
-                <label for="editShiftId">Shift Id:</label>
-                <input type="number" id="editShiftId" name="editShiftId" readonly>
-            </div>
-            <div class="form-row">
-                <label for="editStartTime">Start Time:</label>
-                <input type="time" id="editStartTime" name="start_time" required>
-            </div>
-            <div class="form-row">
-                <label for="editEndTime">End Time:</label>
-                <input type="time" id="editEndTime" name="end_time" required>
-            </div>
-            <div class="form-row">
-                <label for="editShiftName">Shift Name:</label>
-                <input type="text" id="editShiftName" name="shift_name" required>
-            </div>
-            <button type="submit">Update</button>
-        </form>
+            </thead>
+            <tbody>
+            {% for feedback in feedbacks %}
+                <tr>
+                    <td>{{ feedback[0] }}</td>
+                    <td>{{ feedback[1] }}</td>
+                    <td>{{ feedback[2] }}-{{ feedback[3] }}</td>
+                    <td>{{ feedback[4] }}</td>
+                    <td>{{ feedback[5] }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No user reviews available as far</p>
+        {% endif %}
     </div>
+
 </div>
-
 <script>
-    // Modal functionality for editing shifts
-    var modal = document.getElementById("editModal");
-    var closeModal = document.getElementsByClassName("close")[0];
-    var editButtons = document.querySelectorAll(".editBtn");
-
-    // Open the modal and populate the fields with data from the clicked button
-    editButtons.forEach(function(button) {
-        button.addEventListener("click", function() {
-            var shiftId = button.getAttribute("data-id");
-            var startTime = button.getAttribute("data-start-time");
-            var endTime = button.getAttribute("data-end-time");
-            var shiftName = button.getAttribute("data-name");
-
-            document.getElementById("editShiftId").value = shiftId;
-            document.getElementById("editStartTime").value = startTime;
-            document.getElementById("editEndTime").value = endTime;
-            document.getElementById("editShiftName").value = shiftName;
-
-            modal.style.display = "block";
-        });
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
     });
 
-    closeModal.onclick = function() {
-        modal.style.display = "none";
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
     }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
 
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
     }
 </script>
 

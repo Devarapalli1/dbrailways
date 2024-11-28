@@ -138,6 +138,43 @@
         .menu-item.delays { color: #e67e22; }
         .menu-item.cancellations { color: #e74c3c; }
         .menu-item.reservations { color: #2ecc71; }
+
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            background-color: #B8860B;  /* Red color for the logout button */
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #B8860B;  /* Darker red on hover */
+        }
+
+        header {
+            position: relative;
+        }
+
+        header h1 {
+            display: inline-block; /* Keeps the title on the left */
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;  /* Distance from the top of the header */
+            right: 20px; /* Distance from the right side of the header */
+            font-size: 14px;  /* Adjust font size as needed */
+        }
+
+        header a {
+            background-color: #DEB887;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+
     </style>
 </head>
 
@@ -145,6 +182,7 @@
 
 <header>
     <h1>Railway Management</h1>
+    <a href="/alogout" class="logout-btn">Logout</a>
 </header>
 <div class="main-container">
 <!-- Sidebar -->
@@ -169,13 +207,17 @@
         <a href="/add_shifts">Add Shifts</a>
         <a href="/assignemployee_shifts">Add Employee Shifts</a>
     </div>
+    <div class="sub-menu2" id="notif-submenu">
+        <a href="/add_notifications" >Add Notifications</a>
+        <a href="/user_reviews" >View User Reviews</a>
+    </div>
 </div>
 
 <div class="container">
     <img src="../static/images/dashboard.jpg" class="img-rounded" alt="Cinque Terre" width="100%" height="300px">
 </div>
 
-<div class="content">
+    <div class="content">
     <!-- Menu -->
     <div class="menu">
         <div class="menu-item stations">

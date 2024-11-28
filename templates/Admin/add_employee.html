@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Details</title>
     <style>
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background:transparent;
+            height:40px;
+            border:1px solid #d8d8d8;
+            width:220px;
+            -webkit-appearance: none;
+        }
         .sidebar a.active {
             background-color: #DEB887 !important; /* Same color as hover */
             color: #000000; /* Optional: to ensure text is white */
@@ -24,11 +33,13 @@
         /* Sidebar styles */
         .sidebar {
             width: 250px;
-            height: 100vh;
             background-color: #FFFAFA;
             color: #fff;
             padding-top: 20px;
-            position: fixed;
+            overflow-y: scroll;
+            height: 700px;
+            padding-bottom: 20px;
+
         }
 
         .sidebar h2 {
@@ -56,7 +67,8 @@
             width: 100%; /* Makes the container take up the full width */
             padding: 20px; /* Adds 20px padding inside the container */
             background-color: #fff; /* White background color */
-            border-radius: 8px; /* Rounded corners */
+            border-radius: 8px;
+            height: 700px/* Rounded corners */
 
         }
 
@@ -72,8 +84,12 @@
         }
         form input[type="text"],
         form input[type="number"],
+        form input[type="tel"],
+        form input[type="email"],
+        form input[type="password"],
+        select,
         form button {
-            width: 100%;
+            width: 90%;
             padding: 12px;
             margin: 10px 0;
             font-size: 16px;
@@ -210,6 +226,41 @@
             gap: 10px;  /* Space between label and input */
             align-items: center;  /* Vertically center label and input */
         }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            background-color: #B8860B;  /* Red color for the logout button */
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #B8860B;  /* Darker red on hover */
+        }
+
+        header {
+            position: relative;
+        }
+
+        header h1 {
+            display: inline-block; /* Keeps the title on the left */
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;  /* Distance from the top of the header */
+            right: 20px; /* Distance from the right side of the header */
+            font-size: 14px;  /* Adjust font size as needed */
+        }
+
+        header a {
+            background-color: #DEB887;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
 
 
     </style>
@@ -218,6 +269,7 @@
 
 <header>
     <h1>Railway Management</h1>
+    <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
 <div class="main-container">
@@ -241,16 +293,17 @@
         <a href="/add_shifts">Add Shifts</a>
         <a href="/assignemployee_shifts">Add Employee Shifts</a>
     </div>
+    <div class="sub-menu2" id="notif-submenu">
+        <a href="/add_notifications" >Add Notifications</a>
+        <a href="/user_reviews" >View User Reviews</a>
+    </div>
 </div>
 <div class="container">
     <h1>Add Employee Details</h1>
+    <section>
     <form action="/add_employees" method="POST">
         <!-- Group fields into three per row -->
         <div class="form-row">
-            <div class="form-item">
-                <label for="employee_id">Employee ID:</label>
-                <input type="text" id="employee_id" name="employee_id" required>
-            </div>
             <div class="form-item">
                 <label for="employee_name">Employee Name:</label>
                 <input type="text" id="employee_name" name="employee_name" required>
@@ -324,6 +377,7 @@
 
         <button type="submit">Submit</button>
     </form>
+    </section>
 </div>
 </div>
 
@@ -339,15 +393,12 @@
         <th>Mobile</th>
         <th>Role</th>
         <th>Address</th>
-        <th>City</th>
-        <th>State</th>
-        <th>Country</th>
-        <th>Zipcode</th>
-        <th>Password</th>
+
         <th>Status</th>
         <th>Salary</th>
         <th>Department ID</th>
         <th>Edit</th>
+        <th>Delete</th>
     </tr>
     </thead>
     <tbody>
@@ -359,11 +410,6 @@
             <td>{{ employee[3] }}</td>
             <td>{{ employee[4] }}</td>
             <td>{{ employee[5] }}</td>
-            <td>{{ employee[6] }}</td>
-            <td>{{ employee[7] }}</td>
-            <td>{{ employee[8] }}</td>
-            <td>{{ employee[9] }}</td>
-            <td>{{ employee[10] }}</td>
             <td>{{ employee[11] }}</td>
             <td>{{ employee[12] }}</td>
             <td>{{ employee[13] }}</td>
@@ -381,6 +427,9 @@
                         data-status="{{ employee[11] }}"
                         data-salary="{{ employee[12] }}"
                         data-department_id="{{ employee[13] }}">Edit</button></td>
+            <td>
+                <button onclick="openDeleteModal('{{ employee[0] }}', '{{ employee[1] }}')">Delete</button>
+            </td>
 
         </tr>
     {% endfor %}
@@ -462,6 +511,20 @@
             </div>
 
             <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteModal()">&times;</span>
+        <h2>Confirm Deletion</h2>
+        <p>Are you sure you want to delete employee <span id="deleteEmployeeName"></span>?</p>
+        <form id="deleteForm" action="/delete_employee" method="POST">
+            <input type="hidden" id="deleteEmployeeId" name="employee_id">
+            <button type="submit">Yes, Delete</button>
+            <button type="button" onclick="closeDeleteModal()">Cancel</button>
         </form>
     </div>
 </div>
@@ -557,5 +620,35 @@
         document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
     }
 </script>
+<script>
+    function openDeleteModal(employeeId, employeeName) {
+        document.getElementById("deleteEmployeeId").value = employeeId;
+        document.getElementById("deleteEmployeeName").innerText = employeeName;
+        document.getElementById("deleteModal").style.display = "block";
+    }
+
+    function closeDeleteModal() {
+        document.getElementById("deleteModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var deleteModal = document.getElementById("deleteModal");
+        if (event.target == deleteModal) {
+            closeDeleteModal();
+        }
+    }
+
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+</script>
+
 </body>
 </html>

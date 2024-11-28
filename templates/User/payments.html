@@ -7,6 +7,10 @@
     <title>Booking List</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
+        .sidebar a.active {
+            background-color: #87CEEB !important; /* Same color as hover */
+            color: #000000; /* Optional: to ensure text is white */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -78,7 +82,7 @@
             cursor: pointer;
         }
         form button:hover {
-            background-color: #DEB887;
+            background-color: #87CEEB;
         }
         table {
             width: 100%;
@@ -108,14 +112,14 @@
         }
         table td button {
             padding: 8px 12px;
-            background-color: #DEB887;
+            background-color: #87CEEB;
             color: #000;
             border: 1px solid #ddd;
             cursor: pointer;
             border-radius: 5px;
         }
         table td button:hover {
-            background-color: #c7a56d;
+            background-color: #87CEEB;
         }
         .modal {
             display: none;
@@ -189,7 +193,7 @@
         <a href="/booking_history" id="booking-link">Booking History</a>
         <a href="/user_feedback" id="feedback-link">Feedback</a>
         <a href="/notifications" id="notification-link">Notifications</a>
-        <a href="/payments" id="payment-link">Payments</a>
+        <a href="/payments" id="payment-link" class="active">Payments</a>
         <a href="/ulogout" id="logout-link">Logout</a>
     </div>
 
@@ -197,8 +201,6 @@
     <div class="content-header">
         <h1>Payments History</h1>
     </div>
-
-    <!-- Check if there are payments -->
     {% if payment_details|length > 0 %}
         <table>
             <thead>
@@ -208,7 +210,7 @@
                 <th>Booking Date</th>
                 <th>Start Point</th>
                 <th>End Point</th>
-                <th>Ticket</th>
+                <th>Total Price</th>
             </tr>
             </thead>
             <tbody>
@@ -219,7 +221,7 @@
                     <td>{{ payment_detail[10] }}</td>
                     <td>{{ payment_detail[13] }}</td>
                     <td>{{ payment_detail[14] }}</td>
-                    <td><a href="/payments/{{ payment_detail[0] }}" class="btn-view">View Details</a></td>
+                    <td>{{ payment_detail[15] }}</td>
                 </tr>
             {% endfor %}
             </tbody>
