@@ -73,6 +73,7 @@
             <th>Employee Name</th>
             <th>Shift Name</th>
             <th>Edit</th>
+            <th>Delete</th>
         </tr>
         </thead>
         <tbody>
@@ -82,6 +83,7 @@
                 <td>{{ employee_shift[1] }}</td>
                 <td>{{ employee_shift[2] }}</td>
                 <td><button class="editBtn" data-id="{{ employee_shift[0] }}" data-emp-name="{{ employee_shift[1] }}" data-shift-name="{{ employee_shift[2]}}">Edit</button></td>
+                <td><button onclick="openDeleteModal({{ employee_shift[3] }})">Delete</button></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -123,6 +125,21 @@
         </form>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteModal()">&times;</span>
+        <h2>Confirm Deletion</h2>
+        <p>Are you sure you want to delete shift <span id="deleteShiftName"></span>?</p>
+        <form id="deleteForm" action="/deleteemployee_shifts" method="POST">
+            <input type="hidden" id="deleteShiftId" name="shift_id">
+            <button type="submit">Yes, Delete</button>
+            <button type="button" onclick="closeDeleteModal()">Cancel</button>
+        </form>
+    </div>
+</div>
+
 <script>
     // Modal functionality for editing shifts
     var modal = document.getElementById("editModal");
@@ -151,6 +168,24 @@
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
+        }
+    }
+</script>
+<script>
+    // JavaScript for Delete Modal
+    function openDeleteModal(shiftId) {
+        document.getElementById("deleteShiftId").value = shiftId;
+        document.getElementById("deleteModal").style.display = "block";
+    }
+
+    function closeDeleteModal() {
+        document.getElementById("deleteModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var deleteModal = document.getElementById("deleteModal");
+        if (event.target == deleteModal) {
+            closeDeleteModal();
         }
     }
 </script>

@@ -827,7 +827,7 @@ def view_employeesshifts():
     """)
     active_employees = cur.fetchall()
 
-    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name 
+    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name, s.shift_id
     FROM employee_shifts es JOIN shifts s ON es.shift_id = s.shift_id
     JOIN employee e ON es.employee_id = e.employee_id
     """)
@@ -930,6 +930,26 @@ def editemployee_shifts():
         # Redirect to login page if no admin_id in session
         return redirect(url_for('admin_login'))
 
+@app.route('/deleteemployee_shifts', methods=['POST'])
+def deleteemployee_shifts():
+    admin_id = session.get('admin_id')
+    shift_id = request.form['shift_id']
+
+    if admin_id:
+        cur = mysql.connection.cursor()
+        try:
+            # Execute the DELETE query to remove the shift from the database
+            cur.execute("DELETE FROM employee_shifts WHERE shift_id = %s", (shift_id,))
+            mysql.connection.commit()
+        except Exception as e:
+            mysql.connection.rollback()  # Rollback in case of an error
+            flash(f"Error: {str(e)}", 'danger')  # Flash an error message
+        finally:
+            cur.close()
+
+        return redirect(url_for('assignemployee_shifts'))  # Redirect after deletion
+    else:
+        return redirect(url_for('admin_login'))  # Redirect to login if not logged in
 
 
 @app.route('/add_train')
