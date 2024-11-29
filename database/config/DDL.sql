@@ -19,7 +19,7 @@ CREATE TABLE department (
 );
 
 CREATE TABLE employee (
-    employee_id INT PRIMARY KEY,
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
     employee_name VARCHAR(100),
     mail VARCHAR(100),
     mobileNumber VARCHAR(15),
@@ -67,7 +67,7 @@ CREATE TABLE maintenanceschedule (
     main_description VARCHAR(120),
     main_status VARCHAR(50),
     train_id INT,
-FOREIGN KEY (train_id) REFERENCES train(train_id)
+    FOREIGN KEY (train_id) REFERENCES train(train_id)
 );
 
 CREATE TABLE stations (
@@ -133,7 +133,7 @@ CREATE TABLE route_schedules (
 
 CREATE TABLE seats (
     seat_id INT PRIMARY KEY AUTO_INCREMENT,
-    seat_number INT,
+    seat_number VARCHAR(10),
     class VARCHAR(50),
     price DECIMAL(10, 2),
     train_id INT,
@@ -143,9 +143,8 @@ CREATE TABLE seats (
 CREATE TABLE scheduleseats (
     schedule_id INT,
     seat_id INT,
-    availability_status VARCHAR(30),
-    PRIMARY KEY (schedule_id,
-                seat_id),
+    availability_status varchar(20),
+    PRIMARY KEY (schedule_id, seat_id),
     FOREIGN KEY (schedule_id) REFERENCES schedules(schedule_id),
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id)
 );
@@ -179,15 +178,6 @@ CREATE TABLE user (
     user_password VARCHAR(100)
 );
 
-CREATE TABLE dependents (
-    dependent_id INT PRIMARY KEY AUTO_INCREMENT,
-    dependent_name VARCHAR(100),
-    mail VARCHAR(100),
-    mobileNumber VARCHAR(15),
-    age INT,
-    user_id INT,
-    FOREIGN KEY (user_id) REFERENCES user(user_id)
-);
 
 CREATE TABLE booking (
     booking_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -196,6 +186,18 @@ CREATE TABLE booking (
     booking_time time,
     status VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
+CREATE TABLE dependents (
+    dependent_id INT PRIMARY KEY AUTO_INCREMENT,
+    dependent_name VARCHAR(100),
+    mail VARCHAR(100),
+    mobileNumber VARCHAR(15),
+    age INT,
+    user_id INT,
+    booking_id INT,
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );
 
 CREATE TABLE feedback (
@@ -225,12 +227,12 @@ CREATE TABLE ticket (
 );
 
 CREATE TABLE notifications (
-   notification_id INT PRIMARY KEY AUTO_INCREMENT,
-   noti_description TEXT,
-   noti_date DATE,
-   noti_time TIME,
-   admin_id INT,
-   FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
+    notification_id INT PRIMARY KEY AUTO_INCREMENT,
+    noti_description TEXT,
+    noti_date DATE,
+    noti_time TIME,
+    admin_id INT,
+    FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
 );
 
 CREATE TABLE user_notifications (
@@ -251,7 +253,8 @@ CREATE TABLE payment (
     zipcode VARCHAR(10),
     cardNumber VARCHAR(16),
     pay_status VARCHAR(50),
-    pay_date DATE,
+    pay_date DATETIME,
+    total_price DECIMAL(10,2),
     booking_id INT,
     FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );

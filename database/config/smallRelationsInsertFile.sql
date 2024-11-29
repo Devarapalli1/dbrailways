@@ -91,10 +91,10 @@ VALUES
 
 INSERT INTO seats (seat_number, class, price, train_id)
 VALUES
-    (1, 'Economy', 25.00, 1),
-    (2, 'Business', 50.00, 1),
-    (3, 'Economy', 20.00, 2),
-    (4, 'Business', 40.00, 2);
+    (1, '2S', 25.00, 1),
+    (2, 'SL', 50.00, 1),
+    (3, '2S', 20.00, 2),
+    (4, 'SL', 40.00, 2);
 
 INSERT INTO scheduleseats (schedule_id, seat_id)
 VALUES
@@ -118,15 +118,15 @@ VALUES
     ('Tom Hanks', 'tom.h@example.com', '5555555555', '789 Maple St', 'CityX', 'StateY', 'CountryZ', '99999', 'userpass1'),
     ('Emma Watson', 'emma.w@example.com', '4444444444', '101 Oak St', 'CityY', 'StateZ', 'CountryX', '88888', 'userpass2');
 
-INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id)
-VALUES
-    ('Charlie Green', 'charlie.green@example.com', '5551234567', 15, 1),
-    ('Diana White', 'diana.white@example.com', '4449876543', 18, 2);
-
 INSERT INTO booking (user_id, date, booking_time, status)
 VALUES
     (1, '2024-12-01', '08:30:00', 'Confirmed'),
     (2, '2024-12-02', '09:15:00', 'Pending');
+
+INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id, booking_id)
+VALUES
+    ('Charlie Green', 'charlie.green@example.com', '5551234567', 15, 1, 1),
+    ('Diana White', 'diana.white@example.com', '4449876543', 18, 2, 2);
 
 INSERT INTO feedback (feed_description, feed_date, feed_time, user_id)
 VALUES
@@ -148,8 +148,7 @@ VALUES
     (1, 1),
     (2, 2);
 
-INSERT INTO payment (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, date, time, booking_id)
+INSERT INTO payment (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, pay_date, total_price, booking_id)
 VALUES
-    ('Credit Card', '123 Main St', 'San Francisco', 'CA', 'USA', '94101', '1234567812345678', 'Completed', '2024-11-01', '10:30:00', 1),
-    ('Debit Card', '456 Elm St', 'Dallas', 'TX', 'USA', '75201', '8765432187654321', 'Refunded', '2024-11-02', '13:00:00', 2);
-
+    ('Credit Card', '123 Main St', 'San Francisco', 'CA', 'USA', '94101', '1234567812345678', 'Completed', '2024-11-01 10:30:00', '100', 1),
+    ('Debit Card', '456 Elm St', 'Dallas', 'TX', 'USA', '75201', '8765432187654321', 'Refunded', '2024-11-02 10:30:00', '200', 2);
