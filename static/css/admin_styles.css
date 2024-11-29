@@ -1,0 +1,297 @@
+.sidebar a.active {
+    background-color: #DEB887 !important; /* Same color as hover */
+    color: #000000; /* Optional: to ensure text is white */
+}
+
+select {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: transparent;
+    height: 40px;
+    border: 1px solid #d8d8d8;
+    width: 220px;
+    -webkit-appearance: none;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7fc;
+}
+
+header {
+    background-color: #DEB887;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+
+}
+
+.main-container {
+    display: flex;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #FFFAFA;
+    color: #fff;
+    padding-top: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 24px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    color: #000000;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #DEB887;
+}
+
+/* Active link style */
+.sidebar a.active {
+    background-color: #4CAF50;
+}
+
+.container {
+    width: 100%; /* Makes the container take up the full width */
+    padding: 20px; /* Adds 20px padding inside the container */
+    background-color: #fff; /* White background color */
+    border-radius: 8px; /* Rounded corners */
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+form label {
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: inline-block;
+    color: #555;
+}
+
+form input[type="text"],
+form input[type="number"],
+form button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    background-color: #DEB887;
+    color: #000000;
+    border: none;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #DEB887;
+}
+
+/* Table styling to match the form layout */
+table {
+    width: 100%; /* Ensure the table takes up full width of its container */
+    max-width: 900px; /* Similar max-width as the form container */
+    margin: 20px auto; /* Center the table with space on top */
+    border: 1px solid black; /* Light border around the table */
+    border-radius: 8px; /* Rounded corners to match the form */
+    overflow: hidden; /* Ensures rounded corners are visible */
+}
+
+/* Table header and cells styling */
+table th, table td {
+    padding: 12px 16px; /* Similar padding to form fields */
+    text-align: center; /* Center the text inside cells */
+    border: 1px solid black;
+    /* Same border style as form inputs */
+}
+
+/* Table header styling */
+table th {
+    background-color: #f4f4f4; /* Light background for header */
+    color: #555; /* Dark text color for contrast */
+    font-weight: bold;
+    border: 1px solid;
+}
+
+/* Alternate row color */
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+    color: #555; /* Light background for even rows */
+    border: 1px solid;
+}
+
+/* Hover effect on table rows */
+table tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+
+}
+
+/* Button styling inside the table (e.g., for Edit buttons) */
+table td button {
+    padding: 8px 12px; /* Padding for the buttons */
+    background-color: #DEB887; /* Match the button color */
+    color: #000; /* Dark button text */
+    border: 1px solid #ddd;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded button corners */
+}
+
+table td button:hover {
+    background-color: #c7a56d; /* Darker color on hover */
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 8px;
+}
+
+.modal-header {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.modal .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.modal .close:hover,
+.modal .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap; /* Allow the form to wrap if necessary */
+    gap: 20px; /* Space between each field */
+    align-items: center; /* Vertically center items */
+}
+
+.form-row {
+    display: flex;
+    gap: 10px; /* Space between label and input */
+    align-items: center; /* Vertically center label and input */
+}
+
+label {
+    width: 150px;
+    text-align: right; /* Align label text to the right */
+}
+
+input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px; /* Space between label and input */
+    align-items: center; /* Vertically center label and input */
+}
+
+
+.logout-btn {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    background-color: #B8860B; /* Red color for the logout button */
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #B8860B; /* Darker red on hover */
+}
+
+header {
+    position: relative;
+}
+
+header h1 {
+    display: inline-block; /* Keeps the title on the left */
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px; /* Distance from the top of the header */
+    right: 20px; /* Distance from the right side of the header */
+    font-size: 14px; /* Adjust font size as needed */
+}
+
+header a {
+    background-color: #DEB887;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.flash-messages {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flash {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.flash.danger {
+    background-color: #f44336; /* Red for error */
+}
+
+.flash.success {
+    background-color: #4CAF50; /* Green for success */
+}
+
+.flash.info {
+    background-color: #2196F3; /* Blue for informational messages */
+}
