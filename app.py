@@ -1380,7 +1380,6 @@ GROUP BY t.train_id, t.train_name, t.train_type, t.train_capacity, t.numOfCoache
             cur.close()
     return  render_template('User/search_booking.html')
 
-
 @app.route('/book_ticket/<int:schedule_id>', methods=['GET'])
 def book_ticket(schedule_id):
     user_id =session['user_id']
@@ -1499,7 +1498,7 @@ def submit_payment(schedule_id):
                 mysql.connection.commit()
 
                 flash('Payment processed and booking successful!', 'success')
-                return render_template('User/confirmation.html',train_id=train_id, total_price=total_price, schedule_id=schedule_id, booking_id=booking_id)
+                return redirect(url_for('booking_confirmation', booking_id=booking_id))
 
             except Exception as e:
                 # Rollback in case of an error
@@ -1529,37 +1528,58 @@ def booking_history():
     cur.close()
     return  render_template('User/booking_history.html',bookings=bookings)
 
-@app.route('/booking_details/<int:booking_id>', methods=['GET'])
-def booking_details(booking_id):
+@app.route('/booking_confirmation/<int:booking_id>', methods=['GET'])
+def booking_confirmation(booking_id):
+    user_id = session.get('user_id')
+
+    if not user_id:
+        flash("You must be logged in to view your booking", 'danger')
+        return redirect(url_for('user_login'))
+
     cur = mysql.connection.cursor()
 
-    # Fetch the booking details
-    cur.execute("SELECT * FROM booking WHERE booking_id = %s", (booking_id,))
-    booking = cur.fetchone()
+    query = """
+    SELECT
+        booking_id,
+        date AS booking_date,
+        status AS booking_status
+    FROM booking
+    WHERE booking_id = %s;
+    """
+    cur.execute(query, (booking_id,))
+    booking_details = cur.fetchone()
 
-    if not booking:
-        return jsonify({"error": "Booking not found"}), 404  # Return JSON error message
+    if not booking_details:
+        flash("Booking not found or you don't have access to it.", 'danger')
+        return redirect(url_for('user_dashboard'))
 
     # Fetch the ticket details
-    cur.execute("""SELECT t.ticket_number, s.seat_number, d.dependent_name 
-                    FROM ticket t JOIN seats s ON t.seat_id = s.seat_id
-                    JOIN dependents d ON t.dependent_id = d.dependent_id
-                    WHERE t.booking_id = %s;""", (booking_id,))
+    cur.execute("""
+    SELECT 
+    t.ticket_number, s.seat_number, d.dependent_name 
+    FROM ticket t JOIN seats s ON t.seat_id = s.seat_id
+    JOIN dependents d ON t.dependent_id = d.dependent_id
+    WHERE t.booking_id = %s;""", (booking_id,))
     tickets = cur.fetchall()
-    print(len(tickets))
 
-    # If no tickets found, return a message
     if not tickets:
-        return jsonify({"tickets": [], "message": "No tickets found for this booking"}), 200
+        flash("No tickets found for this booking.", 'danger')
+        return redirect(url_for('user_dashboard'))
 
-    # Return the booking details and tickets in JSON format
-    return jsonify({
-        "booking_id": booking[0],
-        "date": booking[2],
-        "status": booking[3],
-        "tickets": tickets
-    })
+    # Fetch the ticket details
+    cur.execute("""
+    SELECT 
+    p.total_price, p.pay_status, p.payment_type 
+    FROM payment p 
+    WHERE booking_id = %s;""", (booking_id,))
+    payment = cur.fetchone()
 
+    if not tickets:
+        flash("No tickets found for this booking.", 'danger')
+        return redirect(url_for('user_dashboard'))
+    cur.close()
+
+    return render_template('User/booking_confirmation.html', booking=booking_details, tickets=tickets, payment=payment)
 
 @app.route('/notifications')
 def user_notifications():

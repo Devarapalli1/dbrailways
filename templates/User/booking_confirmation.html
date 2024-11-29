@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .confirmation-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        section h2 {
+            color: #007BFF;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        a.btn {
+            display: block;
+            width: 98%;
+            padding: 10px;
+            text-align: center;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        a.btn:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f2f2f2;
+            margin-top: 30px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="confirmation-container">
+    <h1>Booking Confirmation</h1>
+
+    <!-- Booking Details Section -->
+    <section class="booking-details">
+        <h2>Booking Details</h2>
+        <p><strong>Booking ID:</strong> <span>{{ booking[0] }}</span></p>
+        <p><strong>Booking Date:</strong> {{ booking[1] }}</p>
+        <p><strong>Status:</strong> {{ booking[2] }}</p>
+    </section>
+
+    <!-- Tickets Section -->
+    <section class="tickets-details">
+        <h2>Ticket Details</h2>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Ticket Number</th>
+                <th>Seat Number</th>
+                <th>Dependent Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket[0] }}</td>
+                    <td>{{ ticket[1] }}</td>
+                    <td>{{ ticket[2] }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Payment Information Section -->
+    <section class="payment-information">
+        <h2>Payment Information</h2>
+        <p><strong>Total Amount:</strong> ₹{{ payment[0] }}</p>
+        <p><strong>Payment Type:</strong> {{ payment[2] }}</p>
+        <p><strong>Payment Status:</strong> {{ payment[1] }}</p>
+    </section>
+
+    <!-- Back Button -->
+    <a href="{{ url_for('user_dashboard') }}" class="btn">Back to Dashboard</a>
+</div>
+
+
+</body>
+</html>

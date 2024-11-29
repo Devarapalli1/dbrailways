@@ -227,7 +227,10 @@
                     <td>{{ booking[4] }}</td>
                     <td>{{ booking[5] }}-{{ booking[6] }}</td>
                     <td>
-                        <button onclick="openTicketModal({{ booking[0] }})">View Details</button>
+                        <!-- Button to open booking confirmation page -->
+                        <button id="viewDetailsButton" onclick="window.location.href='/booking_confirmation/{{ booking[0] }}'">
+                            View Details
+                        </button>
                     </td>
                 </tr>
             {% endfor %}
@@ -238,82 +241,5 @@
     {% endif %}
 </div>
 </div>
-
-<!-- Modal for Ticket Details -->
-<div id="ticketModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeTicketModal()">&times;</span>
-        <h3>Ticket Details</h3>
-        <div id="ticketDetails">
-            <!-- Ticket details will be dynamically loaded here -->
-        </div>
-    </div>
-</div>
-
-<script>
-    // Open the ticket details modal and load ticket data
-    function openTicketModal(booking_id) {
-        fetch(`/booking_details/${booking_id}`)
-            .then(response => response.json())
-            .then(data => {
-                const modal = document.getElementById('ticketModal');
-                const ticketDetails = document.getElementById('ticketDetails');
-
-                // Clear previous content
-                ticketDetails.innerHTML = '';
-
-                // Populate the modal with ticket details
-                if (data.tickets && data.tickets.length > 0) {
-                    const table = document.createElement('table');
-                    table.classList.add('ticket-table');
-
-                    const tableHeader = document.createElement('thead');
-                    tableHeader.innerHTML = `
-                            <tr>
-                                <th>Ticket Number</th>
-                                <th>Seat Number</th>
-                                <th>Dependent Name</th>
-                            </tr>
-                        `;
-                    table.appendChild(tableHeader);
-
-                    const tableBody = document.createElement('tbody');
-                    data.tickets.forEach(ticket => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                                <td>${ticket[0]}</td>
-                                <td>${ticket[1]}</td>
-                                <td>${ticket[2]}</td>
-                            `;
-                        tableBody.appendChild(row);
-                    });
-
-                    table.appendChild(tableBody);
-                    ticketDetails.appendChild(table);
-                } else {
-                    ticketDetails.innerHTML = '<p>No tickets found.</p>';
-                }
-
-                modal.style.display = "block";
-            })
-            .catch(error => {
-                console.error('Error loading ticket details:', error);
-            });
-    }
-
-    // Close the ticket details modal
-    function closeTicketModal() {
-        document.getElementById("ticketModal").style.display = "none";
-    }
-
-    // Close the modal if the user clicks anywhere outside of the modal
-    window.onclick = function(event) {
-        var modal = document.getElementById("ticketModal");
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
-
 </body>
 </html>
