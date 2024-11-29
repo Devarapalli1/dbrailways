@@ -118,7 +118,7 @@ def edit_departments():
             return render_template('Admin/add_department.html', error="Invalid department ID. Please enter a valid number.")
         cur = mysql.connection.cursor()
         try:
-            cur.execute("SELECT * FROM department WHERE dept_name = %s;", (editDeptName,))
+            cur.execute("SELECT * FROM department WHERE dept_name = %s and department_id != %s;", (editDeptName,editDeptId,))
             existing_dept = cur.fetchone()  # Fetch one record if it exists
             cur.execute("SELECT * FROM department")
             departments = cur.fetchall()
@@ -188,7 +188,7 @@ def add_employees():
             country = request.form['country']
             zipcode = request.form['zipcode']
             emp_password = request.form['emp_password']
-            emp_status = request.form['emp_status']
+            emp_status = "Active"
             salary = request.form['salary']
             department_id = request.form['department_id']
             cur = mysql.connection.cursor()
@@ -223,7 +223,7 @@ def edit_employees():
             state = request.form['editState']
             country = request.form['editCountry']
             zipcode = request.form['editZipcode']
-            emp_password = request.form['emp_password']
+            emp_password = request.form['editPassword']
             emp_status = request.form['editStatus']
             salary = request.form['editSalary']
             department_id = request.form['editDepartmentId']
@@ -270,8 +270,10 @@ def view_maintenanceschedule():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM maintenanceschedule")
     maintenances = cur.fetchall()  # Fetch all records from the table
+    cur.execute("SELECT * FROM train")
+    trains = cur.fetchall()  # Fetch all records from the table
     cur.close()
-    return render_template('Admin/maintanace_schedule.html',maintenances=maintenances)
+    return render_template('Admin/maintanace_schedule.html',maintenances=maintenances, trains=trains)
 
 @app.route('/add_maintenance', methods=['POST'])
 def add_maintenanceschedule():
@@ -489,8 +491,6 @@ def edit_trainschedule():
         return render_template('Admin/train_schedule.html')
     else:
         return redirect(url_for('admin_login'))
-
-
 
 @app.route('/add_stations')
 def view_stations():
@@ -821,16 +821,22 @@ def delete_station_from_route():
 @app.route('/assignemployee_shifts')
 def view_employeesshifts():
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name FROM employee_shifts es JOIN shifts s ON es.shift_id = s.shift_id
-        JOIN employee e ON es.employee_id = e.employee_id
+    cur.execute("""SELECT employee_id
+    FROM employee
+    where emp_status="Active"
+    """)
+    active_employees = cur.fetchall()
+
+    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name 
+    FROM employee_shifts es JOIN shifts s ON es.shift_id = s.shift_id
+    JOIN employee e ON es.employee_id = e.employee_id
     """)
     employee_shifts = cur.fetchall()
     cur.execute("""SELECT * from shifts""")
     shifts=cur.fetchall()
-    print(shifts)
      # Fetch all records from the table
     cur.close()
-    return render_template('Admin/employee_shifts.html',shifts=shifts,employee_shifts=employee_shifts)
+    return render_template('Admin/employee_shifts.html',shifts=shifts,employee_shifts=employee_shifts, active_employees=active_employees)
 
 @app.route('/assignemployee_shifts', methods=['POST'])
 def assignemployee_shifts():
@@ -878,16 +884,29 @@ def editemployee_shifts():
 
             try:
                 # Step 1: Check if the new shift assignment already exists
-                cur.execute("""SELECT * FROM employee_shifts WHERE employee_id = %s AND shift_id = %s""", (editEmployeeId, new_shift_id))
+                cur.execute("""SELECT * FROM employee_shifts WHERE employee_id = %s AND shift_id != %s""", (editEmployeeId, new_shift_id))
 
                 existing_shift = cur.fetchone()  # If this returns a row, it means the combination exists
 
                 if existing_shift:
+                    cur.execute("""SELECT employee_id
+                    FROM employee
+                    where emp_status="Active"
+                    """)
+                    active_employees = cur.fetchall()
+
+                    cur.execute("""SELECT e.employee_id, e.employee_name, s.shift_name 
+                    FROM employee_shifts es JOIN shifts s ON es.shift_id = s.shift_id
+                    JOIN employee e ON es.employee_id = e.employee_id
+                    """)
+                    employee_shifts = cur.fetchall()
+                    cur.execute("""SELECT * from shifts""")
+                    shifts=cur.fetchall()
                     # If the combination already exists, send an error message
                     return render_template('Admin/employee_shifts.html',
-                                           error="This employee is already assigned to this shift.",shifts=shifts)
+                                           error="This employee is already assigned to this shift.",shifts=shifts,employee_shifts=employee_shifts, active_employees=active_employees)
 
-                # Step 2: Proceed to update the shift if combination doesn't exist
+            # Step 2: Proceed to update the shift if combination doesn't exist
                 cur.execute("""UPDATE employee_shifts SET shift_id = %s WHERE employee_id = %s""", (new_shift_id, editEmployeeId))
 
                 # Commit the changes to the database
@@ -1165,7 +1184,11 @@ def add_delays():
 @app.route('/add_notifications')
 def view_notificatons():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM notifications")
+    cur.execute("""SELECT N.* , UN.user_id
+    FROM notifications N
+    JOIN user_notifications UN
+    on N.notification_id = UN.notification_id
+    """)
     notifications = cur.fetchall()
     cur.execute("SELECT * FROM user")
     users = cur.fetchall()
@@ -1491,13 +1514,11 @@ def submit_payment(schedule_id):
             return render_template('User/error.html')
     return redirect(url_for('user_login'))
 
-
-
 @app.route('/booking_history')
 def booking_history():
     user_id =session['user_id']
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT b.booking_id, b.date AS booking_date, b.status AS booking_status,t.train_id AS train_number,t.train_name,
+    cur.execute("""SELECT distinct b.booking_id, b.date AS booking_date, b.status AS booking_status,t.train_id AS train_number,t.train_name,
                 s.start_date AS journey_date,s.departure_time AS journey_time FROM booking b
                 JOIN ticket tk ON b.booking_id = tk.booking_id
                 JOIN schedules s ON tk.schedule_id = s.schedule_id
@@ -1582,25 +1603,13 @@ def payments():
     user_id =session['user_id']
     cur = mysql.connection.cursor()
     query = """
-    SELECT 
-        p.payment_id,
-        p.payment_type,
-        p.address,
-        p.city,
-        p.state,
-        p.country,
-        p.zipcode,
-        p.cardNumber,
-        p.pay_status,
+    SELECT distinct 
         b.booking_id,
+        p.payment_type,
         b.date AS booking_date,
-        t.ticket_id,
-        t.ticket_number,
         s1.name AS start_point,    
         s2.name AS end_point,
-        p.total_price,   
-        s1.address AS start_address,
-        s2.address AS end_address
+        p.total_price
     FROM 
         payment p
     JOIN 

@@ -292,7 +292,6 @@
         </div>
     </div>
     <div class="container">
-        <h1>Add Department Details</h1>
         <form action="/add_notifications" method="POST">
 
             <div class="form-row">
@@ -323,6 +322,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Admin Id</th>
+                    <th>User Id</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -333,6 +333,7 @@
                         <td>{{ notification[2] }}</td>
                         <td>{{ notification[3] }}</td>
                         <td>{{ notification[4] }}</td>
+                        <td>{{ notification[5] }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

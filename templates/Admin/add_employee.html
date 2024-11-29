@@ -353,10 +353,6 @@
                 <label for="emp_password">Password:</label>
                 <input type="password" id="emp_password" name="emp_password" required>
             </div>
-            <div class="form-item">
-                <label for="emp_status">Status:</label>
-                <input type="text" id="emp_status" name="emp_status">
-            </div>
         </div>
 
         <div class="form-row">
@@ -393,12 +389,11 @@
         <th>Mobile</th>
         <th>Role</th>
         <th>Address</th>
-
         <th>Status</th>
         <th>Salary</th>
         <th>Department ID</th>
         <th>Edit</th>
-        <th>Delete</th>
+        <th>Deactivate</th>
     </tr>
     </thead>
     <tbody>
@@ -413,7 +408,11 @@
             <td>{{ employee[11] }}</td>
             <td>{{ employee[12] }}</td>
             <td>{{ employee[13] }}</td>
-            <td><button class="editBtn" data-id="{{ employee[0] }}"
+            <td>
+                {% if employee[11]|lower == 'inactive' %}
+                <button class="editBtn" style="background-color: grey; color: white; cursor: not-allowed;" disabled>Edit</button>
+                {% else %}
+                <button class="editBtn" data-id="{{ employee[0] }}"
                         data-name="{{ employee[1] }}"
                         data-email="{{ employee[2] }}"
                         data-mobile="{{ employee[3] }}"
@@ -426,9 +425,15 @@
                         data-password="{{ employee[10] }}"
                         data-status="{{ employee[11] }}"
                         data-salary="{{ employee[12] }}"
-                        data-department_id="{{ employee[13] }}">Edit</button></td>
+                        data-department_id="{{ employee[13] }}">Edit</button>
+                {% endif %}
+            </td>
             <td>
-                <button onclick="openDeleteModal('{{ employee[0] }}', '{{ employee[1] }}')">Delete</button>
+                {% if employee[11]|lower == 'inactive' %}
+                <button class="editBtn" style="background-color: grey; color: white; cursor: not-allowed;" disabled>Deactivate</button>
+                {% else %}
+                <button onclick="openDeleteModal('{{ employee[0] }}', '{{ employee[1] }}')">Deactivate</button>
+                {% endif %}
             </td>
 
         </tr>

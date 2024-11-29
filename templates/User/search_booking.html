@@ -248,11 +248,11 @@
         <th>End Point</th>
         <th>Start Time</th>
         <th>End Time</th>
-        <th>Price</th>
+        <th>Base Price</th>
         <th>Seats Available</th>
-        <th>Sleeper AC(SL)</th>
-        <th>Chair AC(CC)</th>
-        <th>Non-AC Sleeper(2S)</th>
+        <th>Sleeper AC(SL) (+100.00/Ticket)</th>
+        <th>Chair AC(CC) (+75.00/Ticket)</th>
+        <th>Non-AC Sleeper(2S) (+50.00/Ticket)</th>
         <th>Book</th>
     </tr>
     </thead>
@@ -272,9 +272,13 @@
             <td>{{ detail[19] }}</td>
 
             <td>
-                <form action="/book_ticket/{{ detail[6] }}" method="GET">
-                <button type="submit">Book</button>
-                </form>
+                {% if detail[16] > 0 %}
+                    <form action="/book_ticket/{{ detail[6] }}" method="GET">
+                        <button type="submit">Book</button>
+                    </form>
+                {% else %}
+                    <span>No seats available</span>
+                {% endif %}
             </td>
         </tr>
     {% endfor %}

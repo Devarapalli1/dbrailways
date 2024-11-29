@@ -297,7 +297,12 @@
 <form action="/add_maintenance" method="POST">
     <div class="form-row">
     <label for="trainId">Train Id:</label>
-    <input type="number" id="trainId" name="train_id" required><br><br>
+    <select id="trainId" name="train_id" required>
+        <option value="">Select train</option>
+        {% for train in trains %}
+            <option value="{{ train[0] }}">{{ train[0] }}</option>
+        {% endfor %}
+    </select>
     </div>
     <div class="form-row">
     <label for="maintenanceDate">Maintenance Date:</label>
@@ -361,7 +366,7 @@
         <h2>Edit Maintenance Schedule</h2>
         <form id="editForm" action="edit_maintenance" method="POST">
             <div class="form-row">
-                <label for="editMaintenanceId">Department Id:</label>
+                <label for="editMaintenanceId">Maintenance Id:</label>
                 <input type="number" id="editMaintenanceId" name="editMaintenanceId" required readonly><br><br>
             </div>
             <div class="form-row">
