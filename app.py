@@ -874,6 +874,7 @@ def assignemployee_shifts():
                             (employee_id, shift_id))
                 existing_entry = cur.fetchone()
                 if existing_entry:
+                    flash("This employee is already assigned to this shift.")
                     return redirect(url_for('view_employeesshifts'))
                     # Inserting data into the database
                 cur.execute("INSERT INTO employee_shifts(employee_id, shift_id) VALUES(%s, %s)",
@@ -901,10 +902,10 @@ def editemployee_shifts():
             cur.execute("""SELECT * from shifts""")
             shifts=cur.fetchall()
             try:
-                cur.execute("""SELECT * FROM employee_shifts WHERE employee_id = %s AND shift_id != %s""", (editEmployeeId, new_shift_id))
-                existing_shift = cur.fetchone()
+                cur.execute("""SELECT shift_id FROM employee_shifts WHERE employee_id = %s""", (editEmployeeId,))
+                existing_shifts = cur.fetchone()
 
-                if existing_shift:
+                if new_shift_id in existing_shifts:
                     cur.execute("""SELECT employee_id FROM employee where emp_status="Active" """)
                     active_employees = cur.fetchall()
 
@@ -948,7 +949,7 @@ def deleteemployee_shifts():
         finally:
             cur.close()
         flash("Deleted the shift for an employee successfully")
-        return redirect(url_for('assignemployee_shifts'))
+        return redirect(url_for('view_employeesshifts'))
     else:
         return redirect(url_for('admin_login'))
 
