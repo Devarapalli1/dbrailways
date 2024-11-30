@@ -44,14 +44,15 @@
 
         <hr>
     <h1>Delay List</h1>
-    <table>
+        {% if delays|length > 0 %}
+        <table>
     <thead>
     <tr>
         <th>Delay ID</th>
         <th>Schedule ID</th>
         <th>Duration</th>
         <th>Reason</th>
-        <th>Edit</th>
+
 
     </tr>
     </thead>
@@ -62,13 +63,14 @@
             <td>{{ delay[1] }}</td>
             <td>{{ delay[2] }}</td>
             <td>{{ delay[3] }}</td>
-            <td>
-                <button class="edit-button" onclick="openEditModal({{ delay.delay_id }}, {{ delay.schedule_id }}, '{{ delay.duration }}', '{{ delay.reason }}')">Edit</button>
-            </td>
+
         </tr>
     {% endfor %}
     </tbody>
 </table>
+        {% elif delays|length == 0 %}
+        <p>No delays available</p>
+        {% endif %}
     </div>
 </div>
 

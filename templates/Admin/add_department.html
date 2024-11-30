@@ -6,6 +6,17 @@
     <title>Train Details</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 100px; /* Distance from the top of the page */
+        left: 60%;
+        transform: translateX(-50%); /* Center horizontally */
+        z-index: 1050; /* Ensure it's above other content */
+        width: 100%;
+        max-width: 500px; /* Optional: Limit the width */
+    }
+</style>
 <body>
 
 <header>
@@ -13,6 +24,16 @@
     <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
+<!-- Flash Message Container -->
+<div class="flash-message-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="main-container">
     <div class="sidebar">
     <a href="/admin_dashboard">Dashboard</a>
@@ -43,10 +64,6 @@
     <div class="container">
     <h1>Add Department Details</h1>
     <form action="/add_departments" method="POST">
-        <div class="form-row">
-            <label for="departmentId">Department Id:</label>
-            <input type="number" id="departmentId" name="departmentId" required><br><br>
-        </div>
         <div class="form-row">
             <label for="name">Department Name:</label>
             <input type="text" id="dept_name" name="dept_name" required><br><br>

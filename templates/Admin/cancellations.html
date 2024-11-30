@@ -46,7 +46,8 @@
 <h1>Cancellation List</h1>
 
 <!-- Cancellations Table -->
-<table>
+        {% if cancellations|length > 0 %}
+        <table>
     <thead>
     <tr>
         <th>Cancellation ID</th>
@@ -66,6 +67,9 @@
     {% endfor %}
     </tbody>
 </table>
+        {% elif cancellations|length == 0 %}
+            <p>No cancellations available</p>
+        {% endif %}
     </div>
 </div>
 <script>

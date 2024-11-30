@@ -45,7 +45,8 @@
 <hr>
 
 <h2>Seat List</h2>
-<table>
+        {% if seats|length > 0 %}
+        <table>
     <thead>
     <tr>
         <th>Seat ID</th>
@@ -68,6 +69,10 @@
     {% endfor %}
     </tbody>
 </table>
+
+        {% elif seats|length == 0 %}
+        <p>No seats information available</p>
+        {% endif %}
     </div>
 
 </div>

@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
     <style>
+        .flash-message-container {
+            position: fixed;
+            top: 100px; /* Distance from the top of the page */
+            left: 60%;
+            transform: translateX(-50%); /* Center horizontally */
+            z-index: 1050; /* Ensure it's above other content */
+            width: 100%;
+            max-width: 500px; /* Optional: Limit the width */
+        }
+
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -58,6 +68,15 @@
 <div class="container">
     <h2>Login</h2>
     <div>{{error}}</div>
+    <div class="flash-message-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-{{ messages[0][0] }} text-center">
+                    {{ messages[0][1] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
     <form action="/user_login" method="POST">
         <!-- Email Input -->
         <input type="email" name="mail" id="email" placeholder="Enter your email" required>

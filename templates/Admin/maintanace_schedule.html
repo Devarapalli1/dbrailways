@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance Schedule Management</title>
+    <title>Train Maintenance</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
 <body>
@@ -61,16 +61,6 @@
     <label for="description">Description:</label>
     <input type="text" id="description" name="main_description" required><br><br>
     </div>
-    <div class="form-row">
-    <label for="status">Status:</label>
-    <select id="status" name="main_status" required>
-        <option value="" disabled selected>Select status</option>
-        <option value="New">New</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Completed">Completed</option>
-    </select><br><br>
-    </div>
-
     <button type="submit">Add Maintenance</button>
 </form>
 
@@ -78,7 +68,8 @@
 <hr>
 
 <h2>Maintenance Schedule List</h2>
-<table>
+    {% if maintenances|length > 0 %}
+    <table>
     <thead>
     <tr>
         <th>Maintenance Id</th>
@@ -104,6 +95,9 @@
     {% endfor %}
     </tbody>
 </table>
+    {% elif maintenances|length == 0 %}
+        <p>No Train maintenances available</p>
+    {% endif %}
 
 </div>
 </div>
@@ -124,18 +118,16 @@
             </div>
             <div class="form-row">
             <label for="editMaintenanceDate">Maintenance Date:</label>
-            <input type="date" id="editMaintenanceDate" name="maintenance_date" required><br><br>
+            <input type="date" id="editMaintenanceDate" name="maintenance_date" required readonly><br><br>
             </div>
             <div class="form-row">
             <label for="editDescription">Description:</label>
-            <input type="text" id="editDescription" name="main_description" required><br><br>
+            <input type="text" id="editDescription" name="main_description" required readonly><br><br>
             </div>
             <div class="form-row">
             <label for="editStatus">Status:</label>
             <select id="editStatus" name="main_status" required>
                 <option value="" disabled selected>Select status</option>
-                <option value="New">New</option>
-                <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
             </select><br><br>
             </div>
@@ -166,6 +158,35 @@
         }
     }
 </script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
 
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
 </body>
 </html>

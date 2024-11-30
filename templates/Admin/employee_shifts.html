@@ -6,12 +6,32 @@
     <title>Employee Shifts Management</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 100px; /* Distance from the top of the page */
+        left: 60%;
+        transform: translateX(-50%); /* Center horizontally */
+        z-index: 1050; /* Ensure it's above other content */
+        width: 100%;
+        max-width: 500px; /* Optional: Limit the width */
+    }
+</style>
 <body>
 <header>
     <h1>Railway Management</h1>
     <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
+<div class="flash-message-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="main-container">
     <div class="sidebar">
         <a href="/admin_dashboard">Dashboard</a>
@@ -54,7 +74,7 @@
     <select id="shift_id" name="shift_id" required>
         <option value="">Select Shift</option>
         {% for shift in shifts %}
-            <option value="{{ shift[0] }}">{{ shift[3] }}</option>
+            <option value="{{ shift[0] }}">{{ shift[0] }}</option>
         {% endfor %}
     </select>
     </div>
@@ -71,6 +91,7 @@
         <tr>
             <th>Employee Id</th>
             <th>Employee Name</th>
+            <th>Shift Id</th>
             <th>Shift Name</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -81,8 +102,9 @@
             <tr>
                 <td>{{ employee_shift[0] }}</td>
                 <td>{{ employee_shift[1] }}</td>
+                <td>{{ employee_shift[3] }}</td>
                 <td>{{ employee_shift[2] }}</td>
-                <td><button class="editBtn" data-id="{{ employee_shift[0] }}" data-emp-name="{{ employee_shift[1] }}" data-shift-name="{{ employee_shift[2]}}">Edit</button></td>
+                <td><button class="editBtn" data-shift-id="{{ employee_shift[3] }}" data-id="{{ employee_shift[0] }}" data-emp-name="{{ employee_shift[1] }}" data-shift-name="{{ employee_shift[2]}}">Edit</button></td>
                 <td><button onclick="openDeleteModal({{ employee_shift[3] }})">Delete</button></td>
             </tr>
         {% endfor %}
@@ -110,11 +132,11 @@
                 <input type="text" id="editEmployeeName" name="editEmployeeName" readonly>
             </div>
             <div class="form-row">
-                <label for="editShiftName">Shift Name:</label>
-                <select id="editShiftName" name="editShiftName" required>
+                <label for="editShiftId">Shift Id:</label>
+                <select id="editShiftId" name="editShiftId" required>
                     <option value="">Select Shift</option>
                     {% for shift in shifts %}
-                        <option value="{{ shift[0] }}">{{ shift[3] }}</option>
+                        <option value="{{ shift[0] }}">{{ shift[0] }}</option>
                     {% endfor %}
 
                 </select><br>
@@ -151,11 +173,11 @@
         button.addEventListener("click", function() {
             var empid = button.getAttribute("data-id");
             var empname = button.getAttribute("data-emp-name");
-            var shiftName = button.getAttribute("data-shift-name");
+            var shiftId = button.getAttribute("data-shift-id");
 
             document.getElementById("editEmployeeId").value = empid;
             document.getElementById("editEmployeeName").value = empname;
-            document.getElementById("editShiftName").value = shiftName;
+            document.getElementById("editShiftId").value = shiftId;
 
             modal.style.display = "block";
         });
@@ -187,6 +209,36 @@
         if (event.target == deleteModal) {
             closeDeleteModal();
         }
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
     }
 </script>
 </body>

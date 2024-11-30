@@ -30,7 +30,8 @@ VALUES
 INSERT INTO department (dept_name, admin_id)
 VALUES
     ('Engineering', 1),
-    ('Operations', 2);
+    ('Operations', 2),
+    ('None', 3);
 
 INSERT INTO employee (employee_id, employee_name, mail, mobileNumber, role, address, city, state, country, zipcode, emp_password, emp_status, salary, department_id)
 VALUES

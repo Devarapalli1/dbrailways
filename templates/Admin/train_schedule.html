@@ -7,24 +7,32 @@
     <title>Schedule Management</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
-
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 100px; /* Distance from the top of the page */
+        left: 60%;
+        transform: translateX(-50%); /* Center horizontally */
+        z-index: 1050; /* Ensure it's above other content */
+        width: 100%;
+        max-width: 500px; /* Optional: Limit the width */
+    }
+</style>
 <body>
 <header>
     <h1>Railway Management</h1>
     <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
-
-<!-- Flash message display section -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul class="flash-messages">
-            {% for category, message in messages %}
-                <li class="flash {{ category }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+<div class="flash-message-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="main-container">
     <div class="sidebar">
         <a href="/admin_dashboard">Dashboard</a>
@@ -73,6 +81,7 @@
         <hr>
 
         <h2>Schedule List</h2>
+    {% if schedules|length >0 %}
         <table>
     <thead>
     <tr>
@@ -85,6 +94,7 @@
         <th>Train Id</th>
         <th>Start Point</th>
         <th>End Point</th>
+        <th>Route Id</th>
 
     </tr>
     </thead>
@@ -100,10 +110,15 @@
             <td>{{ schedule[8] }}</td>
             <td>{{ schedule[9] }}</td>
             <td>{{ schedule[10] }}</td>
+            <td>{{ schedule[11] }}</td>
+
         </tr>
     {% endfor %}
     </tbody>
-</table>
+        </table>
+    {% elif schedules|length == 0 %}
+        <p>No schedules available</p>
+    {% endif %}
     </div>
 </div>
 
@@ -115,7 +130,7 @@
         <form id="addForm" action="/add_schedules" method="POST">
 
             <div class="form-row">
-                <label for="trainId">Train Id:</label>
+                <label for="trainId">Train Name:</label>
                 <select id="trainId" name="train_id" required>
                     <option value="" disabled selected>Select Train</option>
                     {% for train in trains %}
@@ -229,8 +244,8 @@
             <label for="scheduleId">Schedule ID:</label>
             <select id="scheduleId" name="schedule_id" required>
                 <option value="" disabled selected>Select Schedule</option>
-                {% for schedule in schedules %}
-                    <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
+                {% for active_schedule in active_schedules %}
+                    <option value="{{ active_schedule[0] }}">{{ active_schedule[0] }}</option>
                 {% endfor %}
             </select>
 
@@ -254,13 +269,10 @@
             <label for="scheduleId">Schedule ID:</label>
             <select id="scheduleId" name="schedule_id" required>
                 <option value="" disabled selected>Select a Schedule</option>
-                {% for schedule in schedules %}
-                    <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
+                {% for active_schedules in active_schedules %}
+                    <option value="{{ active_schedules[0] }}">{{ active_schedules[0] }}</option>
                 {% endfor %}
             </select>
-
-            <label for="cancellationDate">Cancellation Date:</label>
-            <input type="date" id="cancellationDate" name="cancellation_date" required>
 
             <label for="reason">Reason for Cancellation:</label>
             <textarea id="reason" name="reason" required></textarea>
@@ -319,7 +331,7 @@
     // Add Cancellations Form Schedule
     document.getElementById('deleteStationForm').addEventListener('submit', function (event) {
         const scheduleId = document.getElementById('scheduleId').value;
-        const cancellationDate = document.getElementById('cancellationDate').value;
+
         const reason = document.getElementById('reason').value;
     });
 
@@ -461,7 +473,36 @@
         document.getElementById("end_dt").addEventListener("blur", removeSeconds);
     };
 </script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
 
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
 </body>
 
 </html>

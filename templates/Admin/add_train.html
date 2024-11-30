@@ -6,12 +6,32 @@
     <title>Train Details</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 100px; /* Distance from the top of the page */
+        left: 60%;
+        transform: translateX(-50%); /* Center horizontally */
+        z-index: 1050; /* Ensure it's above other content */
+        width: 100%;
+        max-width: 500px; /* Optional: Limit the width */
+    }
+</style>
 <body>
 <header>
     <h1>Railway Management</h1>
     <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
+<div class="flash-message-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="main-container">
     <div class="sidebar">
         <a href="/admin_dashboard">Dashboard</a>
@@ -58,7 +78,7 @@
         </div>
         <div class="form-row">
         <label for="train_capacity">Train Capacity:</label>
-        <input type="number" id="train_capacity" name="train_capacity" min="1" required><br>
+        <input type="number" id="train_capacity" name="train_capacity" min="5" required><br>
         </div>
         <div class="form-row">
         <label for="numOfCoaches">Number of Coaches:</label>
@@ -71,6 +91,7 @@
     <hr>
 
     <h2>Train List</h2>
+        {% if trains|length > 0 %}
     <table>
         <thead>
         <tr>
@@ -99,6 +120,9 @@
         {% endfor %}
         </tbody>
     </table>
+        {% elif trains|length == 0 %}
+            <p>No trains available</p>
+        {% endif %}
 </div>
 </div>
 
@@ -118,11 +142,11 @@
             </div>
             <div class="form-row">
                 <label for="edit_train_type">Train Type:</label>
-                <input type="text" id="edit_train_type" name="train_type" required><br>
+                <input type="text" id="edit_train_type" name="train_type" required readonly><br>
             </div>
             <div class="form-row">
                 <label for="edit_train_capacity">Train Capacity:</label>
-                <input type="number" id="edit_train_capacity" name="train_capacity" required><br>
+                <input type="number" id="edit_train_capacity" name="train_capacity" required readonly><br>
             </div>
             <div class="form-row">
                 <label for="edit_numOfCoaches">Number of Coaches:</label>
