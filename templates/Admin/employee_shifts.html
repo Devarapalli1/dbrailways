@@ -33,31 +33,7 @@
     {% endwith %}
 </div>
 <div class="main-container">
-    <div class="sidebar">
-        <a href="/admin_dashboard">Dashboard</a>
-        <a href="#" id="train-link">Trains</a>
-        <div class="sub-menu" id="train-submenu">
-            <a href="/add_train">Add Train</a>
-            <a href="/add_stations">Add Stations</a>
-            <a href="/add_seats">View Seats</a>
-            <a href="/add_schedules">Add Schedules</a>
-            <a href="/add_routes">Add Routes</a>
-            <a href="/add_cancellations">View Cancellations</a>
-            <a href="/add_delays">View Delays</a>
-            <a href="/add_maintenance">Add Maintanance</a>
-        </div>
-        <a href="#" id="employee-link">Employees</a>
-        <div class="sub-menu1" id="employee-submenu">
-            <a href="/add_departments">Add Departments</a>
-            <a href="/add_employees">Add Employees</a>
-            <a href="/add_shifts">Add Shifts</a>
-            <a href="/assignemployee_shifts" class="active">Add Employee Shifts</a>
-        </div>
-        <div class="sub-menu2" id="notif-submenu">
-            <a href="/add_notifications" >Add Notifications</a>
-            <a href="/user_reviews" >View User Reviews</a>
-        </div>
-    </div>
+    {% include 'Admin/sidebar.html' %}
     <div class="container">
     <form action="/assignemployee_shifts" method="POST">
     <div class="form-row">
