@@ -78,12 +78,12 @@ VALUES
     (1, 1),
     (2, 2);
 
-INSERT INTO route_stations (route_id, station_id, stoptime)
+INSERT INTO route_stations (route_id, station_id, order_id, stoptime)
 VALUES
-    (1, 1, 10),
-    (1, 2, 20),
-    (2, 2, 15),
-    (2, 1, 25);
+    (1, 1, 0,10),
+    (1, 2, 1, 20),
+    (2, 2, 0, 15),
+    (2, 1, 1, 25);
 
 INSERT INTO route_schedules (route_id, schedule_id)
 VALUES

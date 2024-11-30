@@ -653,9 +653,17 @@ def add_routes():
                 "INSERT INTO route (num_of_stationstops, distance, start_station, end_station) VALUES (%s, %s, %s, %s)",
                 (2, distance, start_station, end_station))
             route_id = cur.lastrowid
-            cur.execute("INSERT INTO route_stations (route_id, station_id, stoptime) VALUES (%s, %s, %s)",(route_id, start_station, 10))
-            cur.execute("INSERT INTO route_stations (route_id, station_id, stoptime) VALUES (%s, %s, %s)",
-                (route_id, end_station, 10))
+
+            # Insert into the route_station table
+            cur.execute(
+                "INSERT INTO route_stations (route_id, station_id, order_id, stoptime) VALUES (%s, %s, %s, %s)",
+                (route_id, start_station, 0, 10)  # Adjust 'stop_time' value as needed
+            )
+            cur.execute(
+                "INSERT INTO route_stations (route_id, station_id, order_id, stoptime) VALUES (%s, %s, %s, %s)",
+                (route_id, end_station, 1, 10)  # Adjust 'stop_time' value as needed
+            )
+
             mysql.connection.commit()
             flash("routes added successfully")
             return redirect(url_for('view_routes'))
@@ -673,11 +681,11 @@ def get_stations_for_route(route_id):
     cursor = mysql.connection.cursor()
     try:
         query = """
-            SELECT s.name 
+            SELECT s.name
             FROM route_stations rs
             JOIN stations s ON rs.station_id = s.station_id
             WHERE rs.route_id = %s
-            ORDER BY rs.station_id
+            ORDER BY rs.order_id
         """
         cursor.execute(query, (route_id,))
         stations = cursor.fetchall()
@@ -731,10 +739,22 @@ def add_station_to_route():
             flash("This station is already part of the route.", "error")
             return redirect('/add_routes')
 
+        cursor.execute("""
+            SELECT station_id, order_id FROM route_stations 
+            WHERE route_id = %s
+            ORDER BY order_id desc limit 1;
+        """, (route_id))
+        last_station = cursor.fetchone()
+
         # Insert the station into the route
         cursor.execute(
-            "INSERT INTO route_stations (route_id, station_id) VALUES (%s, %s)",
-            (route_id, station[0])
+            "INSERT INTO route_stations (route_id, station_id, order_id) VALUES (%s, %s, %s)",
+            (route_id, station[0], last_station[1])
+        )
+
+        cursor.execute(
+            "UPDATE route_stations SET order_id = %s WHERE route_id = %s AND station_id = %s",
+            (last_station[1]+1, route_id, last_station[0])
         )
 
         # Increase the number of station stops in the route
@@ -1427,13 +1447,17 @@ def search_booktrains():
        COUNT(CASE WHEN st.class = '2S' AND ss.availability_status = 'Available' THEN 1 END) AS first_class_seat_count
 FROM train t
 JOIN schedules s ON t.train_id = s.train_id
+LEFT JOIN route_schedules rss ON rss.schedule_id = s.schedule_id
+LEFT JOIN route_stations rs_start ON rs_start.route_id = rss.route_id AND rs_start.station_id = %s  -- Source station in route
+LEFT JOIN route_stations rs_end ON rs_end.route_id = rss.route_id AND rs_end.station_id = %s  -- Destination station in route
 LEFT JOIN stations sp ON s.start_point = sp.station_id  -- Join for start station
 LEFT JOIN stations ep ON s.end_point = ep.station_id    -- Join for end station
 LEFT JOIN seats st ON t.train_id = st.train_id          -- Join for seats
 LEFT JOIN scheduleseats ss ON s.schedule_id = ss.schedule_id AND st.seat_id = ss.seat_id  -- Join for schedule seats
-WHERE s.start_point = %s
-  AND s.end_point = %s
-  AND s.start_date = %s  -- Use quotes for date
+WHERE rs_start.route_id IS NOT NULL  -- Ensure source station is part of the route
+  AND rs_end.route_id IS NOT NULL    -- Ensure destination station is part of the route
+  AND rs_start.order_id < rs_end.order_id  -- Ensure the source station comes before the destination station in the route
+  AND s.start_date = %s  -- Journey start date
 GROUP BY t.train_id, t.train_name, t.train_type, t.train_capacity, t.numOfCoaches, t.admin_id,
          s.schedule_id, s.start_date, sp.name, s.departure_time, ep.name, s.end_point, 
          s.end_date, s.arrival_time, s.status, s.price, s.seats_available;

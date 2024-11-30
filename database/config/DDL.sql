@@ -117,9 +117,10 @@ CREATE TABLE train_schedules (
 CREATE TABLE route_stations (
     route_id INT,
     station_id INT,
+    order_id INT,
     stoptime INT,
     PRIMARY KEY (route_id, station_id),
-    FOREIGN KEY (route_id) REFERENCES route(route_id) ,
+    FOREIGN KEY (route_id) REFERENCES route(route_id),
     FOREIGN KEY (station_id) REFERENCES stations(station_id)
 );
 

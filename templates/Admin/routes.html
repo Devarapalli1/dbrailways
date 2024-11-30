@@ -336,13 +336,13 @@
                     stationList.innerHTML = '';
 
                     if (data.stations.length > 0) {
-                        const ul = document.createElement('ul');
+                        const ol = document.createElement('ol');
                         data.stations.forEach(station => {
                             const li = document.createElement('li');
                             li.textContent = station.name;
-                            ul.appendChild(li);
+                            ol.appendChild(li);
                         });
-                        stationList.appendChild(ul);
+                        stationList.appendChild(ol);
                     } else {
                         stationList.textContent = 'No stations found for this route.';
                     }
