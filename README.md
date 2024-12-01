@@ -28,16 +28,8 @@ source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-
-3. Configure the database connection:
-   Open the `Assignment2.py` file and update the `DB_CONFIG` dictionary with your MySQL server details:
-```
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "<your_username>",
-    "password": "<your_password>"
-}
-```
+4. Configure the database connection:
+   Open `database/config.py` file and update the `Config` class with your MySQL server details:
 
 Ensure you have the following SQL files in the config directory:
 - DDL.sql: Contains the database schema
@@ -48,3 +40,6 @@ Navigate to the project directory in your terminal.
 Run the main Python script:
 
 ```python database/setup.py```
+
+### Finally Start the application
+```python app.py```

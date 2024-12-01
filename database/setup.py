@@ -1,39 +1,24 @@
 import mysql
 
+from config import Config
 from dbconnection import seed_sql_filedata, execute_schema_file, create_or_use_database, drop_database
 
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "Mysql@2024"
+    "host": Config.MYSQL_HOST,
+    "user": Config.MYSQL_USER,
+    "password": Config.MYSQL_PASSWORD
 }
 
-def get_database_name():
-    choice = input("The assignment uses a default database name 'rms'. "
-                   "Would you like to continue with the default (1) or create a database with a new name (2)? ")
-    while True:
-        if choice.strip() == '1':
-            db_name = 'rms'
-            break
-
-        elif choice.strip() == '2':
-            db_name = input("Enter the new database name: ").strip()
-            while db_name == "":
-                db_name = input("Invalid database name, please enter a valid database name: ").strip()
-            break
-        else:
-            choice = input("Invalid choice, please enter 1 to continue with the default or 2 to create a new database: ")
-    return db_name
+config = DB_CONFIG.copy()
 
 def create_connection(db_name=None):
-    config = DB_CONFIG.copy()
     if db_name:
         config["database"] = db_name
     return mysql.connector.connect(**config)
 
 if __name__ == "__main__":
-    print("Welcome to RMS Project - Adi Vishnu Madhuri Devarapalli(11818524)")
-    db_name = get_database_name()
+    print("Welcome to Railway Management Service Project")
+    db_name = Config.MYSQL_DB
 
     # Establish the connection without specifying a database
     connection = create_connection()

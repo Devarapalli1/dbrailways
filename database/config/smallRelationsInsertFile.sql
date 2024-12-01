@@ -8,7 +8,7 @@ TRUNCATE TABLE department;
 TRUNCATE TABLE admin;
 TRUNCATE TABLE train;
 TRUNCATE TABLE shifts;
-TRUNCATE TABLE route_stations
+TRUNCATE TABLE route_stations;
 TRUNCATE TABLE stations;
 TRUNCATE TABLE route;
 TRUNCATE TABLE schedules;
@@ -101,16 +101,16 @@ VALUES
 
 INSERT INTO seats (seat_number, class, price, train_id)
 VALUES
-    (SL1, 'SL', 100.00, 101),
-    (CC1, 'CC', 75.00, 101),
-    (CC2, 'CC', 75.00, 101),
-    (2S1, '2S', 50.00, 101),
-    (2S2, '2S', 50.00, 101),
-    (SL1, 'SL', 100.00, 102),
-    (CC1, 'CC', 75.00, 102),
-    (CC2, 'CC', 75.00, 102),
-    (2S1, '2S', 50.00, 102),
-    (2S2, '2S', 50.00, 102);
+    ('SL1', 'SL', 100.00, 101),
+    ('CC1', 'CC', 75.00, 101),
+    ('CC2', 'CC', 75.00, 101),
+    ('2S1', '2S', 50.00, 101),
+    ('2S2', '2S', 50.00, 101),
+    ('SL1', 'SL', 100.00, 102),
+    ('CC1', 'CC', 75.00, 102),
+    ('CC2', 'CC', 75.00, 102),
+    ('2S1', '2S', 50.00, 102),
+    ('2S2', '2S', 50.00, 102);
 
 
 INSERT INTO scheduleseats (schedule_id, seat_id,availability_status)
@@ -136,7 +136,8 @@ VALUES
 
 INSERT INTO user (name, mail, mobileNumber, address, city, state, country, zipcode, user_password)
 VALUES
-    ('Madhuri', 'avm122@gmail.com', '1234567891', '1101 Avenue', 'Piduguralla', 'Andhra Pradesh', 'India', '522413', '123');
+    ('Madhuri', 'avm122@gmail.com', '1234567891', '1101 Avenue', 'Piduguralla', 'Andhra Pradesh', 'India', '522413', '123'),
+    ('user', 'user@gmail.com', '1234567891', '1101 Avenue', 'Piduguralla', 'Andhra Pradesh', 'India', '522413', '123');
 
 INSERT INTO booking (user_id, date, booking_time, status)
 VALUES
@@ -155,7 +156,7 @@ VALUES
 INSERT INTO ticket (ticket_number, booking_id, seat_id, schedule_id, issue_date, status, user_id,dependent_id)
 VALUES
     ('TICKET4630', 1, 1, 2, '2024-11-30', 'Cancelled', 1,1),
-    ('TICKET3867', 2, 2, 1, '2024-11-30', 'Issued', 1,2)
+    ('TICKET3867', 2, 2, 1, '2024-11-30', 'Issued', 1,2);
 
 INSERT INTO notifications (noti_description, noti_date, noti_time, admin_id)
 VALUES

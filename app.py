@@ -2,20 +2,15 @@ import math
 from random import random
 from flask import flash, Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_mysqldb import MySQL
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
-import decimal
 
+from database.config import Config
 
 app = Flask(__name__)
 
 # MySQL configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Mysql@2024'
-app.config['MYSQL_DB'] = 'RailwayManagement'
-app.secret_key = 'BAD_SECRET_KEY'
-# Initialize MySQL
+app.config.from_object(Config)
 mysql = MySQL(app)
 
 @app.route('/')
