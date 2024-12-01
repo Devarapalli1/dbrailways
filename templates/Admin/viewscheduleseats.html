@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Management</title>
+    <link rel="stylesheet" href="../../static/css/admin_styles.css">
+</head>
+<body>
+<header>
+    <h1>Railway Management</h1>
+    <a href="/alogout" class="logout-btn">Logout</a>
+    <h3>{{ error }}</h3>
+</header>
+<div class="main-container">
+    <div class="sidebar">
+        <a href="/admin_dashboard">Dashboard</a>
+        <a href="#" id="train-link">Trains</a>
+        <div class="sub-menu" id="train-submenu">
+            <a href="/add_train">Add Trains</a>
+            <a href="/add_stations">Add Stations</a>
+            <a href="/add_seats" class="active">View Seats</a>
+            <a href="/add_schedules">Add Schedules</a>
+            <a href="/add_routes">Add Routes</a>
+            <a href="/add_cancellations">View Cancellations</a>
+            <a href="/add_delays">View Delays</a>
+            <a href="/add_maintenance">Add Maintanance</a>
+
+        </div>
+        <a href="#" id="employee-link">Employees</a>
+        <div class="sub-menu1" id="employee-submenu">
+            <a href="/add_departments">Add Departments</a>
+            <a href="/add_employees">Add Employees</a>
+            <a href="/add_shifts">Add Shifts</a>
+            <a href="/assignemployee_shifts">Add Employee Shifts</a>
+        </div>
+        <div class="sub-menu2" id="notif-submenu">
+            <a href="/add_notifications" >Add Notifications</a>
+            <a href="/user_reviews" >View User Reviews</a>
+        </div>
+    </div>
+    <div class="container">
+        <form action="/viewscheduleseats" method="POST">
+            <div class="form-row">
+                <label for="schedule_id">Schedule Id:</label>
+                <select id="schedule_id" name="schedule_id" required>
+                    <option value="">Select Schedule Id</option>
+                    {% for schedule in schedules %}
+                        <option value="{{ schedule[0] }}">{{ schedule[0] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Get details</button>
+        </form>
+
+        <hr>
+
+        <h2>View Seats availability for given Schedule</h2>
+        {% if scheduleseats|length > 0 %}
+            <table>
+                <thead>
+                <tr>
+                    <th>Train ID</th>
+                    <th>Schedule ID</th>
+                    <th>Seat Number</th>
+                    <th>Class</th>
+                    <th>Seat Status</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for scheduleseat in scheduleseats %}
+                    <tr>
+                        <td>{{ scheduleseat[0] }}</td>
+                        <td>{{ scheduleseat[1] }}</td>
+                        <td>{{ scheduleseat[2] }}</td>
+                        <td>{{ scheduleseat[3] }}</td>
+                        <td>{{ scheduleseat[4] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Seat</h2>
+        <form id="editForm" action="/edit_seat" method="POST">
+            <div class="form-row">
+                <label for="editSeatId">Seat ID:</label>
+                <input type="number" id="editSeatId" name="seat_id" readonly><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editSeatNumber">Seat Number:</label>
+                <input type="text" id="editSeatNumber" name="seat_number" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editClass">Class:</label>
+                <input type="text" id="editClass" name="class" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editPrice">Price:</label>
+                <input type="number" step="0.01" id="editPrice" name="price" required><br><br>
+            </div>
+            <div class="form-row">
+                <label for="editTrainId">Train ID:</label>
+                <select id="editTrainId" name="train_id" required>
+                    {% for train in trains %}
+                        <option value="{{ train[0] }}">{{ train[1] }}</option>
+                    {% endfor %}
+                </select><br><br>
+            </div>
+            <button type="submit">Update Seat</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // Get modal element
+    var modal = document.getElementById("editModal");
+    var closeModal = document.getElementsByClassName("close")[0];
+
+    // Get all the edit buttons
+    var editButtons = document.querySelectorAll(".editBtn");
+
+    // When an edit button is clicked
+    editButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+            // Get seat details from the button's data attributes
+            var seatId = button.getAttribute("data-id");
+            var seatNumber = button.getAttribute("data-numOfStops");
+            var classType = button.getAttribute("data-distance");
+            var price = button.getAttribute("data-startStation");
+            var trainId = button.getAttribute("data-endStation");
+
+            // Populate the modal fields with seat data
+            document.getElementById("editSeatId").value = seatId;
+            document.getElementById("editSeatNumber").value = seatNumber;
+            document.getElementById("editClass").value = classType;
+            document.getElementById("editPrice").value = price;
+            document.getElementById("editTrainId").value = trainId;
+
+            // Show the modal
+            modal.style.display = "block";
+        });
+    });
+
+    // Close the modal when the user clicks the "x"
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Close the modal if the user clicks outside the modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('train-link').addEventListener('click', function() {
+        const submenu = document.getElementById('train-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+<script>
+    // JavaScript to handle sidebar submenu toggle
+    document.getElementById('employee-link').addEventListener('click', function() {
+        const submenu = document.getElementById('employee-submenu');
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // JavaScript to handle card clicks and redirect to the "Train" section
+    function goToTrainSection() {
+        // Scroll to the "Trains" section or show it if it's collapsed
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        // Optionally, you can trigger a highlight on the 'Trains' link if you want
+        document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
+    }
+</script>
+
+</body>
+</html>

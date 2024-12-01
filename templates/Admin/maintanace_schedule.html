@@ -6,6 +6,17 @@
     <title>Train Maintenance</title>
     <link rel="stylesheet" href="../../static/css/admin_styles.css">
 </head>
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 100px; /* Distance from the top of the page */
+        left: 60%;
+        transform: translateX(-50%); /* Center horizontally */
+        z-index: 1050; /* Ensure it's above other content */
+        width: 100%;
+        max-width: 500px; /* Optional: Limit the width */
+    }
+</style>
 <body>
 
 <header>
@@ -13,11 +24,19 @@
     <a href="/alogout" class="logout-btn">Logout</a>
     <h3>{{ error }}</h3>
 </header>
+<div class="flash-message-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="main-container">
 {% include 'Admin/sidebar.html' %}
 <div class="container">
-<h1>Add Maintenance Schedule</h1>
-
+<h1>Add Train Maintenance</h1>
 <form action="/add_maintenance" method="POST">
     <div class="form-row">
     <label for="trainId">Train Id:</label>
@@ -29,7 +48,7 @@
     </select>
     </div>
     <div class="form-row">
-    <label for="maintenanceDate">Maintenance Date:</label>
+    <label for="maintenanceDate">Maintenance Start Date:</label>
     <input type="date" id="maintenanceDate" name="maintenance_date" required><br><br>
     </div>
     <div class="form-row">
@@ -63,9 +82,16 @@
             <td>{{ maintenance[2] }}</td>
             <td>{{ maintenance[3] }}</td>
             <td>{{ maintenance[4] }}</td>
+            {%  if maintenance[3]=='In Progress' %}
             <td>
                 <button onclick="openModal({{ maintenance[0] }}, '{{ maintenance[1] }}', '{{ maintenance[2] }}', '{{ maintenance[3] }}', {{ maintenance[4] }})">Edit</button>
             </td>
+            {% else %}
+                <td>
+                    <button class="editBtn" style="background-color: grey; color: white; cursor: not-allowed;" disabled>Edit</button>
+                </td>
+            {% endif %}
+
         </tr>
     {% endfor %}
     </tbody>
@@ -92,7 +118,7 @@
             <input type="number" id="editTrainId" name="train_id" required readonly><br><br>
             </div>
             <div class="form-row">
-            <label for="editMaintenanceDate">Maintenance Date:</label>
+            <label for="editMaintenanceDate">Maintenance Start Date:</label>
             <input type="date" id="editMaintenanceDate" name="maintenance_date" required readonly><br><br>
             </div>
             <div class="form-row">
@@ -163,5 +189,20 @@
         document.querySelector('.sidebar a:nth-child(2)').style.backgroundColor = '#34495e';
     }
 </script>
+<script>
+    // Set the min attribute to today's date
+    document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+        var yyyy = today.getFullYear();
+
+        today = yyyy + '-' + mm + '-' + dd;  // Format as YYYY-MM-DD
+
+        // Set the minimum date for the input field
+        document.getElementById('maintenanceDate').setAttribute('min', today);
+    });
+</script>
+
 </body>
 </html>

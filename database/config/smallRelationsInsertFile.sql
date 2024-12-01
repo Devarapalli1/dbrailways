@@ -2,15 +2,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE employee_shifts;
 TRUNCATE TABLE maintenanceschedule;
 TRUNCATE TABLE scheduleseats;
+TRUNCATE TABLE train_schedules;
 TRUNCATE TABLE employee;
 TRUNCATE TABLE department;
 TRUNCATE TABLE admin;
 TRUNCATE TABLE train;
 TRUNCATE TABLE shifts;
+TRUNCATE TABLE route_stations
 TRUNCATE TABLE stations;
 TRUNCATE TABLE route;
 TRUNCATE TABLE schedules;
 TRUNCATE TABLE seats;
+TRUNCATE TABLE dependents;
 TRUNCATE TABLE user;
 TRUNCATE TABLE ticket;
 TRUNCATE TABLE booking;
@@ -50,40 +53,46 @@ VALUES
 
 INSERT INTO train (train_id, train_name, train_type, train_capacity, numOfCoaches, admin_id)
 VALUES
-    (1, 'Express 101', 'Express', 500, 10, 1),
-    (2, 'Local 202', 'Local', 300, 6, 2);
+    (101, 'CH Express', 'Express', 5, 2, 3),
+    (102, 'HC Express', 'Local', 5, 2, 3);
+
 
 INSERT INTO maintenanceschedule (maintenance_date, main_description, main_status, train_id)
 VALUES
-    ('2024-11-30', 'Routine Maintenance', 'Scheduled', 1),
-    ('2024-12-15', 'Brake Check', 'Scheduled', 2);
+    ('2024-12-01', 'Routine Maintenance', 'In Progress', 102);
 
 INSERT INTO stations (name, address, city, state, country, zipcode)
 VALUES
-    ('Central Station', '123 Main St', 'Metro City', 'StateX', 'CountryZ', '11111'),
-    ('East Station', '456 East Blvd', 'Metro City', 'StateX', 'CountryZ', '22222');
+    ('MGR central', 'Grand Western Trunk Road', 'Chennai', 'Tamil Nadu', 'India', '600003'),
+    ('Hyderabad Deccan', 'Public Garden Rd, Devi Bagh, Red Hills', 'Hyderabad', 'Telangana', 'India', '500001'),
+    ('Piduguralla Station', 'Piduguralla', 'Piduguralla', 'Andhra Pradesh', 'India', '522413'),
+    ('Vijayawada Station', 'Vinchipeta', 'Vijayawada', 'Andhra Pradesh', 'India', '520001');
 
-INSERT INTO route (num_of_stationstops, distance, start_station, end_station)
+
+    INSERT INTO route (num_of_stationstops, distance, start_station, end_station)
 VALUES
-    (2, 120.5, 1, 2),
-    (2, 115, 1, 2);
+    (2, 1000.00, 1, 2),
+    (3, 700.00, 1, 2);
 
 INSERT INTO schedules (start_date, start_point, departure_time, end_point, end_date, arrival_time, status, price, seats_available, train_id)
 VALUES
-    ('2024-12-01', 1, '09:00:00', 2, '2024-12-01', '12:00:00', 'On Time', 50.00, 200, 1),
-    ('2024-12-02', 1, '10:00:00', 2, '2024-12-02', '13:00:00', 'On Time', 45.00, 250, 2);
+    ('2024-12-08', 1, '13:59:00', 2, '2024-12-10', '13:59:00', 'Delayed', 100.00, 4, 101),
+    ('2024-12-05', 1, '14:12:00', 2, '2024-12-06', '14:12:00', 'Cancelled', 50.00, 4, 101);
 
 INSERT INTO train_schedules (train_id, schedule_id)
 VALUES
-    (1, 1),
-    (2, 2);
+    (101, 1),
+    (101, 2);
+
 
 INSERT INTO route_stations (route_id, station_id, order_id, stoptime)
 VALUES
     (1, 1, 0,10),
-    (1, 2, 1, 20),
-    (2, 2, 0, 15),
-    (2, 1, 1, 25);
+    (1, 2, 1, 10),
+    (1, 3, 1, 10),
+    (2, 1, 0, 10),
+    (2, 2, 1, 10),
+    (2, 4, 1, 10);
 
 INSERT INTO route_schedules (route_id, schedule_id)
 VALUES
@@ -92,64 +101,72 @@ VALUES
 
 INSERT INTO seats (seat_number, class, price, train_id)
 VALUES
-    (1, '2S', 25.00, 1),
-    (2, 'SL', 50.00, 1),
-    (3, '2S', 20.00, 2),
-    (4, 'SL', 40.00, 2);
+    (SL1, 'SL', 100.00, 101),
+    (CC1, 'CC', 75.00, 101),
+    (CC2, 'CC', 75.00, 101),
+    (2S1, '2S', 50.00, 101),
+    (2S2, '2S', 50.00, 101),
+    (SL1, 'SL', 100.00, 102),
+    (CC1, 'CC', 75.00, 102),
+    (CC2, 'CC', 75.00, 102),
+    (2S1, '2S', 50.00, 102),
+    (2S2, '2S', 50.00, 102);
 
-INSERT INTO scheduleseats (schedule_id, seat_id)
+
+INSERT INTO scheduleseats (schedule_id, seat_id,availability_status)
 VALUES
-    (1, 1),
-    (1, 2),
-    (2, 3),
-    (2, 4);
+    (1, 1,'Available'),
+    (1, 2, 'Booked'),
+    (1, 3, 'Available'),
+    (1, 4, 'Available'),
+    (1, 5,'Available'),
+    (2, 1,'Booked'),
+    (2, 2, 'Available'),
+    (2, 3, 'Available'),
+    (2, 4, 'Available'),
+    (2, 5,'Available');
 
 INSERT INTO cancellations (schedule_id, cancellation_date, reason)
 VALUES
-    (1, '2024-11-01', 'Technical Issues'),
-    (2, '2024-11-15', 'Low Ticket Sales');
+    (2, '2024-11-3', 'engine failure');
 
 INSERT INTO delay (schedule_id, duration, reason)
 VALUES
-    (1, '00:30:00', 'Weather Conditions'),
-    (2, '01:00:00', 'Mechanical Issues');
+    (1, '00:10:00', 'crossing');
 
 INSERT INTO user (name, mail, mobileNumber, address, city, state, country, zipcode, user_password)
 VALUES
-    ('Tom Hanks', 'tom.h@example.com', '5555555555', '789 Maple St', 'CityX', 'StateY', 'CountryZ', '99999', 'userpass1'),
-    ('Emma Watson', 'emma.w@example.com', '4444444444', '101 Oak St', 'CityY', 'StateZ', 'CountryX', '88888', 'userpass2');
+    ('Madhuri', 'avm122@gmail.com', '1234567891', '1101 Avenue', 'Piduguralla', 'Andhra Pradesh', 'India', '522413', '123');
 
 INSERT INTO booking (user_id, date, booking_time, status)
 VALUES
-    (1, '2024-12-01', '08:30:00', 'Confirmed'),
-    (2, '2024-12-02', '09:15:00', 'Pending');
+    (1, '2024-11-10', '14:32:58', 'Confirmed'),
+    (1, '2024-11-10', '15:02:41', 'Confirmed');
 
 INSERT INTO dependents (dependent_name, mail, mobileNumber, age, user_id, booking_id)
 VALUES
-    ('Charlie Green', 'charlie.green@example.com', '5551234567', 15, 1, 1),
-    ('Diana White', 'diana.white@example.com', '4449876543', 18, 2, 2);
+    ('Madhuri', 'avm122@gmail.com', '1234567891', 25, 1, 1),
+    ('Adi', 'avm@gmail.com', '9010901010', 26, 1, 2);
 
 INSERT INTO feedback (feed_description, feed_date, feed_time, user_id)
 VALUES
-    ('Great service!', '2024-11-01', '14:00:00', 1),
-    ('Delayed train, but comfortable ride.', '2024-11-02', '16:00:00', 2);
+    ('Seats are very comfortable', '2024-11-30', '14:51:08', 1);
 
-INSERT INTO ticket (ticket_number, booking_id, seat_id, schedule_id, issue_date, status, user_id)
+INSERT INTO ticket (ticket_number, booking_id, seat_id, schedule_id, issue_date, status, user_id,dependent_id)
 VALUES
-    ('T12345', 1, 1, 1, '2024-12-01', 'Issued', 1),
-    ('T12346', 2, 2, 2, '2024-12-02', 'Issued', 2);
+    ('TICKET4630', 1, 1, 2, '2024-11-30', 'Cancelled', 1,1),
+    ('TICKET3867', 2, 2, 1, '2024-11-30', 'Issued', 1,2)
 
 INSERT INTO notifications (noti_description, noti_date, noti_time, admin_id)
 VALUES
-    ('Train 1 delayed by 30 minutes.', '2024-11-01', '09:00:00', 1),
-    ('Train 2 maintenance scheduled.', '2024-11-05', '08:00:00', 2);
+    ('added food system inside train for ordering', '2024-11-30', '14:55:36', 3);
 
 INSERT INTO user_notifications (user_id, notification_id)
 VALUES
-    (1, 1),
-    (2, 2);
+    (1, 1);
 
 INSERT INTO payment (payment_type, address, city, state, country, zipcode, cardNumber, pay_status, pay_date, total_price, booking_id)
 VALUES
-    ('Credit Card', '123 Main St', 'San Francisco', 'CA', 'USA', '94101', '1234567812345678', 'Completed', '2024-11-01 10:30:00', '100', 1),
-    ('Debit Card', '456 Elm St', 'Dallas', 'TX', 'USA', '75201', '8765432187654321', 'Refunded', '2024-11-02 10:30:00', '200', 2);
+    ('Creditcard', '1101 Avenue', 'Piduguralla', 'Andhra Pradesh', 'India', '522413', '123456', 'refunded', '2024-11-30 14:32:00', '150.00', 1),
+    ('debitcard', '11111 era', 'Hyderabad', 'Telangana', 'India', '522001', '1234567890', 'Confirmed', '2024-11-30 15:02:41', '175.00', 2);
+

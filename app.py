@@ -297,11 +297,13 @@ def add_maintenanceschedule():
                 else:
                     cur.execute("""INSERT INTO maintenanceschedule(train_id, maintenance_date, main_description, main_status) VALUES(%s, %s, %s, %s)""", (train_id, maintenance_date, main_description, main_status))
                     mysql.connection.commit()  # Commit the changes to the database
-                    return render_template('Admin/maintanace_schedule.html',trains=trains, maintenances=maintenances,error='Maintenance schedule added successfully!')  # Or any other page
+                    flash("Maintenance schedule added successfully!")
+                    return redirect(url_for('view_maintenanceschedule'))
+                    #return render_template('Admin/maintanace_schedule.html',trains=trains, maintenances=maintenances,error='Maintenance schedule added successfully!')  # Or any other page
             except Exception as e:
                 mysql.connection.rollback()  # Rollback in case of an error
                 flash(f"Error: {str(e)}")
-                return redirect(url_for("view_maintenanceschedule"))
+                return redirect(url_for('view_maintenanceschedule'))
             finally:
                 cur.close()
         return render_template('Admin/maintanace_schedule.html')
@@ -321,9 +323,8 @@ def edit_maintenanceschedule():
 
             cur = mysql.connection.cursor()
             try:
-                # Inserting data into the database
-                cur.execute("""UPDATE maintenanceschedule SET maintenance_id=%s, maintenance_date = %s, main_description = %s, main_status = %s WHERE train_id = %s""",
-                            (maintanance_id,maintenance_date, main_description, main_status, train_id))
+                cur.execute("""UPDATE maintenanceschedule SET maintenance_date = %s, main_description = %s, main_status = %s WHERE train_id = %s AND maintenance_id=%s;""",
+                            (maintenance_date, main_description, main_status, train_id,maintanance_id))
 
                 mysql.connection.commit()
                 return redirect(url_for('view_maintenanceschedule'))  # Redirect after success
@@ -748,8 +749,8 @@ def add_station_to_route():
 
         # Insert the station into the route
         cursor.execute(
-            "INSERT INTO route_stations (route_id, station_id, order_id) VALUES (%s, %s, %s)",
-            (route_id, station[0], last_station[1])
+            "INSERT INTO route_stations (route_id, station_id, order_id,stoptime) VALUES (%s, %s, %s,%s)",
+            (route_id, station[0], last_station[1],'10')
         )
 
         cursor.execute(
@@ -1168,6 +1169,30 @@ def view_seats():
     cur.close()
     return render_template('Admin/seats.html',seats=seats,trains=trains)
 
+@app.route('/viewscheduleseats')
+def viewscheduleseats():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT schedule_id FROM schedules where status!='Cancelled'")
+    schedules = cur.fetchall()
+    return render_template('Admin/viewscheduleseats.html',schedules=schedules)
+@app.route('/viewscheduleseats', methods=['POST'])
+def viewseatsperschedule():
+    admin_id=session.get('admin_id')
+    if admin_id:
+        if request.method == 'POST':
+            schedule_id = request.form['schedule_id']
+            cur = mysql.connection.cursor()
+            query = """SELECT s.train_id, ss.schedule_id, s.seat_number, s.class, ss.availability_status FROM seats s
+                        JOIN scheduleseats ss ON s.seat_id = ss.seat_id WHERE ss.schedule_id = %s;"""
+            cur.execute(query, (schedule_id,))
+            scheduleseats = cur.fetchall()
+            cur.execute("SELECT schedule_id FROM schedules where status!='Cancelled'")
+            schedules = cur.fetchall()
+        return render_template('Admin/viewscheduleseats.html', schedules=schedules,scheduleseats=scheduleseats)
+    else:
+        return redirect(url_for('admin_login'))
+
+
 @app.route('/add_seats', methods=['POST'])
 def add_seats():
     admin_id=session.get('admin_id')
@@ -1502,6 +1527,7 @@ def submit_payment(schedule_id):
         now = datetime.now()
         pay_date = now.strftime('%Y-%m-%d %H:%M:%S')
         booking_date = now.strftime('%Y-%m-%d')
+        booking_time = now.strftime('%H:%M:%S')
         seatclass = request.form['seatclass']
         payment_type = request.form['payment_type']
         address = request.form['address']
@@ -1548,7 +1574,7 @@ def submit_payment(schedule_id):
         available_seats_count = cur.fetchone()[0]
         if available_seats_count>=len(dependents_data):
             try:
-                cur.execute("""INSERT INTO booking (user_id, date, status) VALUES (%s, %s, %s)""", (user_id, booking_date, 'Confirmed'))
+                cur.execute("""INSERT INTO booking (user_id, date,booking_time status) VALUES (%s,%s, %s, %s)""", (user_id, booking_date, booking_time,'Confirmed'))
                 mysql.connection.commit()
                 booking_id = cur.lastrowid
 
@@ -1804,13 +1830,11 @@ def delete_delay():
 @app.route('/ulogout')
 def ulogout():
     session.clear()
-    flash('You have been logged out successfully!', 'info')
     return redirect(url_for('home'))  # Redirect to the login page after logout
 
 @app.route('/alogout')
 def alogout():
     session.clear()
-    flash('You have been logged out successfully!', 'info')
     return redirect(url_for('home'))  # Redirect to the login page after logout
 
 if __name__ == '__main__':
