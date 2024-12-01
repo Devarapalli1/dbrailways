@@ -606,21 +606,27 @@ def delete_station():
     if request.method == 'POST':
         station_id = request.form['station_id']
         cur = mysql.connection.cursor()
-        try:
-            cur.execute("SELECT * FROM stations WHERE station_id = %s", (station_id,))
-            station = cur.fetchone()
-            if station is None:
-                return render_template('Admin/stations.html', error="Station not found.")
-            cur.execute("DELETE FROM stations WHERE station_id = %s", (station_id,))
-            mysql.connection.commit()
-            flash("Deleted station details successfully")
-            return redirect(url_for('view_stations'))  # Redirect after success
-        except Exception as e:
-            mysql.connection.rollback()  # Rollback in case of an error
-            return f"Error: {str(e)}"
-        finally:
-            cur.close()
-        return redirect(url_for('view_stations'))
+        cur.execute("SELECT * FROM route_stations WHERE station_id = %s", (station_id,))
+        result=cur.fetchall()
+        if result:
+            flash("This station cannot be deleted because this station is already available in route")
+            return redirect(url_for('view_stations'))
+        else:
+            try:
+                cur.execute("SELECT * FROM stations WHERE station_id = %s", (station_id,))
+                station = cur.fetchone()
+                if station is None:
+                    return render_template('Admin/stations.html', error="Station not found.")
+                cur.execute("DELETE FROM stations WHERE station_id = %s", (station_id,))
+                mysql.connection.commit()
+                flash("Deleted station details successfully")
+                return redirect(url_for('view_stations'))  # Redirect after success
+            except Exception as e:
+                mysql.connection.rollback()  # Rollback in case of an error
+                return f"Error: {str(e)}"
+            finally:
+                cur.close()
+            return redirect(url_for('view_stations'))
     else:
         return redirect(url_for('admin_login'))
 
