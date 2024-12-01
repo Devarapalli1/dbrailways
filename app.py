@@ -1574,7 +1574,7 @@ def submit_payment(schedule_id):
         available_seats_count = cur.fetchone()[0]
         if available_seats_count>=len(dependents_data):
             try:
-                cur.execute("""INSERT INTO booking (user_id, date,booking_time status) VALUES (%s,%s, %s, %s)""", (user_id, booking_date, booking_time,'Confirmed'))
+                cur.execute("""INSERT INTO booking (user_id, date,booking_time, status) VALUES (%s,%s, %s, %s)""", (user_id, booking_date, booking_time,'Confirmed'))
                 mysql.connection.commit()
                 booking_id = cur.lastrowid
 

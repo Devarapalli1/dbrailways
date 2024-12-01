@@ -16,6 +16,29 @@
         width: 100%;
         max-width: 500px; /* Optional: Limit the width */
     }
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        position: relative;
+        margin: 5% auto;
+        max-width: 500px; /* Limit width */
+        max-height: 80%; /* Limit height */
+        overflow-y: auto; /* Enable vertical scrolling inside the modal */
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
 </style>
 <body>
 
@@ -115,83 +138,74 @@
 </div>
 
 <!-- Modal for Adding Employee Details -->
-<div id="addModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
-    <h2>Add Employee Details</h2>
-    <form action="/add_employees" method="POST">
-        <div class="form-row">
-            <div class="form-item">
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Employee Details</h2>
+        <form id="addEmployeeForm" action="/add_employees" method="POST">
+            <div class="form-row">
                 <label for="employee_name">Employee Name:</label>
                 <input type="text" id="employee_name" name="employee_name" required>
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="mail">Employee Email:</label>
                 <input type="email" id="mail" name="mail" required>
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="mobileNumber">Mobile Number:</label>
                 <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" required>
             </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-item">
+            <div class="form-row">
                 <label for="role">Employee Role:</label>
                 <input type="text" id="role" name="role" required>
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="address">
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="city">City:</label>
                 <input type="text" id="city" name="city">
             </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-item">
+            <div class="form-row">
                 <label for="state">State:</label>
                 <input type="text" id="state" name="state">
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="country">Country:</label>
                 <input type="text" id="country" name="country">
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="zipcode">Zipcode:</label>
                 <input type="number" id="zipcode" name="zipcode">
             </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-item">
+            <div class="form-row">
                 <label for="emp_password">Password:</label>
                 <input type="password" id="emp_password" name="emp_password" required>
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="salary">Salary:</label>
                 <input type="number" id="salary" name="salary" min="10000" required>
             </div>
-            <div class="form-item">
+            <div class="form-row">
                 <label for="department_id">Department ID:</label>
                 <select id="department_id" name="department_id" required>
-                    <option value="">Select Department</option>
+                    <option value="" disabled selected>Select Department</option>
                     {% for department in departments %}
                         <option value="{{ department[0] }}">{{ department[1] }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </div>
-
-        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-            <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
-                Submit
-            </button>
-            <button type="button" onclick="hideModal('addModal')" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
-                Cancel
-            </button>
-        </div>
-    </form>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+                    Submit
+                </button>
+                <button type="button" onclick="hideModal('addModal')" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
